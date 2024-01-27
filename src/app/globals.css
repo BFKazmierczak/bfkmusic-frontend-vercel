@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+@layer components {
+  .disabled-button {
+    @apply disabled:bg-neutral-500 disabled:text-neutral-400 disabled:cursor-not-allowed;
+  }
+
+  .basic-button {
+    @apply text-center w-full sm:w-48 px-5 py-2 text-lg text-white disabled-button enabled:bg-pink-600 enabled:active:bg-pink-700  transition-all ease-in-out;
+  }
+
+  .small-button {
+    @apply basic-button disabled-button px-5 py-1 text-sm;
+  }
+
+  .secondary-button {
+    @apply text-center w-full sm:w-48 px-3 py-1 text-lg text-white enabled:bg-neutral-500 enabled:active:bg-pink-700 disabled-button transition-all ease-in-out;
+  }
+
+  .basic-input {
+    @apply px-1 py-2 w-full text-lg bg-neutral-200 outline-none focus:outline-pink-600 transition-all ease-in-out;
+  }
+}
+
+/* body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+} */
