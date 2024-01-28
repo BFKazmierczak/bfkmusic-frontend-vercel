@@ -2,13 +2,8 @@
 const nextConfig = {
   env: {
     BACKEND_URL: process.env.BACKEND_URL,
+    GRAPHQL_ENDPOINT: process.env.GRAPHQL_ENDPOINT,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET
-  },
-  experimental: {
-    appDir: true,
-    fontLoaders: [
-      { loader: '@next/font/google', options: { subsets: ['latin'] } }
-    ]
   }
 }
 

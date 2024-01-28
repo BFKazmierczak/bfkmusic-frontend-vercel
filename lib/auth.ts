@@ -7,7 +7,7 @@ function makeClient() {
   const client = new ApolloClient({
     name: 'AuthClient',
     link: new HttpLink({
-      uri: 'http://127.0.0.1:1337/graphql',
+      uri: process.env.GRAPHQL_ENDPOINT,
       fetch: fetch
     }),
     cache: new InMemoryCache()

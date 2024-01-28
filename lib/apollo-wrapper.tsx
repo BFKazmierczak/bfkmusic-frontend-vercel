@@ -12,7 +12,7 @@ import { useEffect } from 'react'
 
 function makeClient(token: string | undefined) {
   const httpLink = new HttpLink({
-    uri: 'http://127.0.0.1:1337/graphql',
+    uri: process.env.GRAPHQL_ENDPOINT,
     fetch,
     headers: {
       authorization: token ? `Bearer ${token}` : ''
@@ -35,10 +35,6 @@ function makeClient(token: string | undefined) {
 
 export function ApolloWrapper({ children }: React.PropsWithChildren) {
   const session = useSession()
-
-  useEffect(() => {
-    console.log({ session })
-  }, [session])
 
   return (
     <ApolloNextAppProvider
