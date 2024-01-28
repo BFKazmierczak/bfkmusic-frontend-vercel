@@ -2,9 +2,12 @@ import { authOptions } from '@/lib/auth'
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
 import LoginButton from '../components/Buttons/LoginButton'
+import { SessionProvider } from 'next-auth/react'
 
 const HomePage = async () => {
   const session = await getServerSession(authOptions)
+
+  console.log({ session })
 
   return (
     <div className=" p-10 sm:p-0 selection:bg-pink-600 sm:mt-32 flex flex-col gap-y-2">
@@ -15,7 +18,7 @@ const HomePage = async () => {
         Jesteś w miejscu, w którym wszystko masz pod ręką.
       </p>
 
-      {!session && (
+      {session === null && (
         <div className=" flex flex-col items-center gap-y-2 mt-5">
           <Link className=" basic-button" href="/register">
             Zarejestruj się

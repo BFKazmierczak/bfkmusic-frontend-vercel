@@ -1,6 +1,5 @@
 'use client'
 
-import getToken from '@/src/actions/getToken'
 import { ApolloLink, HttpLink } from '@apollo/client'
 import {
   ApolloNextAppProvider,
@@ -11,16 +10,14 @@ import {
 import { useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
-function makeClient(token: string) {
+function makeClient(token: string | undefined) {
   const httpLink = new HttpLink({
     uri: 'http://127.0.0.1:1337/graphql',
     fetch,
     headers: {
-      authorization: `Bearer ${token}`
+      authorization: token ? `Bearer ${token}` : ''
     }
   })
-
-  console.log({ httpLink })
 
   return new NextSSRApolloClient({
     cache: new NextSSRInMemoryCache(),
@@ -44,15 +41,9 @@ export function ApolloWrapper({ children }: React.PropsWithChildren) {
   }, [session])
 
   return (
-    <>
-      {session.status !== 'loading' ? (
-        <ApolloNextAppProvider
-          makeClient={() => makeClient(session.data?.user?.jwt)}>
-          {children}
-        </ApolloNextAppProvider>
-      ) : (
-        <></>
-      )}
-    </>
+    <ApolloNextAppProvider
+      makeClient={() => makeClient(session.data?.user?.jwt)}>
+      {children}
+    </ApolloNextAppProvider>
   )
 }

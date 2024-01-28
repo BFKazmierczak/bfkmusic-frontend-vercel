@@ -1,9 +1,9 @@
 import NextAuth from 'next-auth'
 
 declare module 'next-auth' {
-  interface Session {
-    jwt: string
+  export interface Session {
     user: {
+      jwt: string
       id: number
       username: string
       email: string

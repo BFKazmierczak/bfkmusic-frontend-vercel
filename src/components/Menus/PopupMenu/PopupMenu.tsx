@@ -25,8 +25,9 @@ const useOutsideAlerter = (
 ) => {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target)) {
-        callback()
+      if (ref.current) {
+        let castedCurrent = ref.current as unknown as HTMLDivElement
+        if (!castedCurrent.contains(event.target as Node)) callback()
       }
     }
 

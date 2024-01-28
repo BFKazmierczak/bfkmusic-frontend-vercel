@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "types": ["react/next"],
+    "target": "ESNext",
+    "lib": ["ES2023", "ES2023.Array", "dom", "dom.iterable", "esnext"],
+    // "types": ["react/next"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -26,10 +26,15 @@
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "src/app/**/*.ts",
+    "src/components/**/*.ts",
+    "src/interfaces/**/*.ts",
+    "src/hooks/**/*.ts",
+    "src/pages/**/*.ts",
+    "src/stores/**/*.ts",
+    "src/utils/**/*.ts",
     ".next/types/**/*.ts",
-    "lib/client.js"
+    "lib"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/gql/**/*.ts"]
 }

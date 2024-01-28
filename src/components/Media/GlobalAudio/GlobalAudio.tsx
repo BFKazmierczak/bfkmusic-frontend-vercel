@@ -42,4 +42,6 @@ const GlobalAudio = memo(() => {
   )
 })
 
+GlobalAudio.displayName = 'GlobalAudio'
+
 export default GlobalAudio

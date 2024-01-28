@@ -2,14 +2,13 @@ import { CommentEntity } from '@/src/gql/graphql'
 import formatTimeRange from '@/src/utils/formatTimeRange'
 import moment from 'moment'
 import 'moment/locale/pl'
-import { useSession } from 'next-auth/react'
 
 import VisibilityIcon from '@mui/icons-material/Visibility'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 
 interface CommentBoxProps {
   data: CommentEntity
-  userId: string
+  userId?: number
   selected: boolean
   onSelect?: (id: string, timeRange: string) => void
 }

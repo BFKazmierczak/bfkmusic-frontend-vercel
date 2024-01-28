@@ -5,7 +5,7 @@ import { SongEntity, UploadFileEntity } from '@/src/gql/graphql'
 
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import PauseIcon from '@mui/icons-material/Pause'
-import { useGlobalPlayer } from '../../Providers/GlobalPlayerProvider'
+import useGlobalPlayerStore from '@/src/stores/globalPlayerStore'
 
 interface SongVersionProps {
   song: SongEntity
@@ -15,7 +15,7 @@ interface SongVersionProps {
 
 const SongVersion = ({ song, audio, audioIndex }: SongVersionProps) => {
   const { songData, playing, playSong, pause, currentTime, source } =
-    useGlobalPlayer()
+    useGlobalPlayerStore()
 
   const [localPlaying, setLocalPlaying] = useState<boolean>(false)
 

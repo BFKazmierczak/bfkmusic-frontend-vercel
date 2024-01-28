@@ -3,6 +3,8 @@ import SongList from '@/src/components/Media/SongList'
 import { graphql } from '@/src/gql'
 import { SongEntity } from '@/src/gql/graphql'
 
+// export const dynamic = 'force-dynamic'
+
 const GET_SONGS = graphql(`
   query GetSongs($pagination: PaginationArg) {
     songs(pagination: $pagination) {

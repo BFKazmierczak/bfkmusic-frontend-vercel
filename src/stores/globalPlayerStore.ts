@@ -58,7 +58,7 @@ const useGlobalPlayerStore = create<GlobalPlayerStore>()((set) => ({
         songData: newSongData,
         currentTime: time,
         source: newSrc,
-        duration,
+        duration: duration ? duration : 0,
         playing: true
       }
     })

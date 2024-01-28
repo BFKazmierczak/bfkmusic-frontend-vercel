@@ -5,6 +5,7 @@ import SongViewDetailed from '@/src/components/Media/SongViewDetailed/SongViewDe
 import { gql } from '@apollo/client'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { SongEntity } from '@/src/gql/graphql'
 
 const GET_SONG = graphql(`
   query GetSong($id: ID) {
@@ -111,7 +112,7 @@ const SongPage = async ({ params }: SongPageProps) => {
             {songData.attributes?.name}
           </span>
 
-          <SongViewDetailed song={songData} />
+          <SongViewDetailed song={songData as SongEntity} />
         </div>
       </>
     )

@@ -4,7 +4,8 @@ import SongList from '@/src/components/Media/SongList'
 import SongPlayer from '@/src/components/Media/SongPlayer/SongPlayer'
 import { graphql } from '@/src/gql'
 import { SongEntity } from '@/src/gql/graphql'
-import { gql } from '@apollo/client'
+
+// export const dynamic = 'force-dynamic'
 
 const GET_LIBRARY = graphql(`
   query GetLibrary($pagination: PaginationArg) {

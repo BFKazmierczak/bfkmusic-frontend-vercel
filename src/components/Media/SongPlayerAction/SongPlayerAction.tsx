@@ -250,9 +250,11 @@ const SongPlayerAction = ({
                   <div
                     className=" relative flex flex-col sm:items-center gap-y-5 w-full sm:w-fit h-[50vh] overflow-y-auto"
                     ref={commentContainerRef}
-                    onScroll={(event) =>
-                      setScrolLPosition(event.target.scrollTop)
-                    }>
+                    onScroll={(event) => {
+                      const eTarget = event.target as HTMLElement
+
+                      setScrolLPosition(eTarget.scrollTop)
+                    }}>
                     {commentContainerRef.current &&
                       comments.length > 1 &&
                       commentContainerRef.current?.scrollTop > 0 && (
@@ -274,6 +276,7 @@ const SongPlayerAction = ({
                       .map((comment, index) => {
                         return (
                           <CommentBox
+                            key={comment.id}
                             data={comment}
                             userId={session.data?.user?.id}
                             selected={comment.id === selectedComment}

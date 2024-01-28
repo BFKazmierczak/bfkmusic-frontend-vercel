@@ -2,7 +2,6 @@
 
 import { useContext, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useGlobalPlayer } from '../Providers/GlobalPlayerProvider'
 import PlayArrow from '@mui/icons-material/PlayArrow'
 import Pause from '@mui/icons-material/Pause'
 import AudioSlider from './AudioSlider/AudioSlider'

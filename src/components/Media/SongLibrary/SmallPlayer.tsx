@@ -22,9 +22,8 @@ const SmallPlayer = ({ song, playing, onPause }: SmallPlayerProps) => {
       ) : (
         <div
           onClick={() => {
-            const time = innerTime > 0 ? innerTime : undefined
-
-            playSong(song, time, audioIndex)
+            // const time = innerTime > 0 ? innerTime : undefined
+            // playSong(song, time, audioIndex)
           }}>
           <PlayArrowIcon style={{ fontSize: '3rem' }} />
         </div>

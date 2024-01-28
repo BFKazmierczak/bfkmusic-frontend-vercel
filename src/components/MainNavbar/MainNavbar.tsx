@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect } from 'react'
-import NavbarItem from '@/interfaces/NavbarItem'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import NavbarItem from '@/src/interfaces/NavbarItem'
 
 interface MainNavbarProps {
   items: NavbarItem[]
