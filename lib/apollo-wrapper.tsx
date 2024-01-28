@@ -11,12 +11,12 @@ import { useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
 function makeClient(token: string | undefined) {
+  const headers = token ? { authorization: `Bearer ${token}` } : undefined
+
   const httpLink = new HttpLink({
     uri: process.env.GRAPHQL_ENDPOINT,
     fetch,
-    headers: {
-      authorization: token ? `Bearer ${token}` : ''
-    }
+    headers
   })
 
   return new NextSSRApolloClient({
