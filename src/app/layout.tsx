@@ -28,8 +28,6 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
-  console.log({ children })
-
   return (
     <html lang="en">
       <body className={` ${barlow.className}`}>

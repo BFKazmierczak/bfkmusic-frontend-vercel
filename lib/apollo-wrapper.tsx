@@ -10,13 +10,11 @@ import {
 import { useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 
-function makeClient(token: string | undefined) {
-  const headers = token ? { authorization: `Bearer ${token}` } : undefined
-
+function makeClient(token: string) {
   const httpLink = new HttpLink({
     uri: process.env.GRAPHQL_ENDPOINT,
     fetch,
-    headers
+    headers: { authorization: `Bearer ${token}` }
   })
 
   return new NextSSRApolloClient({
@@ -36,10 +34,18 @@ function makeClient(token: string | undefined) {
 export function ApolloWrapper({ children }: React.PropsWithChildren) {
   const session = useSession()
 
+  const jwt = session.data?.user?.jwt
+
   return (
-    <ApolloNextAppProvider
-      makeClient={() => makeClient(session.data?.user?.jwt)}>
-      {children}
-    </ApolloNextAppProvider>
+    <>
+      {session.status !== 'loading' ? (
+        <ApolloNextAppProvider
+          makeClient={() => makeClient(session.data?.user?.jwt || '')}>
+          {children}
+        </ApolloNextAppProvider>
+      ) : (
+        <></>
+      )}
+    </>
   )
 }
