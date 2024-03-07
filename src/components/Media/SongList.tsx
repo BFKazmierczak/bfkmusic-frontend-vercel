@@ -9,6 +9,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox'
 import { useMutation } from '@apollo/client'
 import { useEffect, useState } from 'react'
 import { graphql } from '@/src/gql'
+import { useSession } from 'next-auth/react'
 
 const ADD_TO_LIBRARY = graphql(`
   mutation AddToLibrary($songId: Int!) {
@@ -49,6 +50,8 @@ interface SongListProps {
 }
 
 const SongList = ({ initialSongs }: SongListProps) => {
+  const session = useSession()
+
   const [songs, setSongs] = useState<SongEntityObject>(() => {
     const temp: SongEntityObject = {}
 
@@ -92,19 +95,21 @@ const SongList = ({ initialSongs }: SongListProps) => {
           return (
             <SongPlayer key={song.id} song={song}>
               {song.attributes?.inLibrary ? (
-                <span className=" flex items-center w-fit gap-x-1 text-sm select-none font-bold text-pink-600">
+                <span className=" flex items-center w-fit h-7 gap-x-1 text-sm select-none font-bold text-pink-600">
                   <CheckBoxIcon style={{ fontSize: '1.25rem' }} />
-                  <span>W bibliotece</span>
+                  <span className=" text-[13px]">W bibliotece</span>
                 </span>
               ) : (
-                <button
-                  className=" small-button"
-                  onClick={handleAdd(Number(song.id))}>
-                  <span className=" flex items-center gap-x-1">
-                    <AddIcon style={{ fontSize: '1rem' }} />
-                    <span>Do biblioteki</span>
-                  </span>
-                </button>
+                session.data && (
+                  <button
+                    className=" small-button h-7"
+                    onClick={handleAdd(Number(song.id))}>
+                    <span className=" flex justify-center items-center gap-x-1">
+                      <AddIcon style={{ fontSize: '1rem' }} />
+                      <span className=" hidden sm:inline">Do biblioteki</span>
+                    </span>
+                  </button>
+                )
               )}
             </SongPlayer>
           )
