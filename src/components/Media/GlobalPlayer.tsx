@@ -54,7 +54,7 @@ const GlobalPlayer = () => {
 
             <div className=" flex flex-col justify-center items-center w-full bg-white">
               <div className=" flex justify-between items-end w-[50%]">
-                {currentFormattedTime}
+                <span className=" w-12">{currentFormattedTime}</span>
 
                 {playing ? (
                   <div onClick={() => pause()}>
@@ -75,7 +75,9 @@ const GlobalPlayer = () => {
                   </div>
                 )}
 
-                {formatTime(duration)}
+                <span className=" flex justify-end w-12">
+                  {formatTime(duration)}
+                </span>
               </div>
 
               <div className=" w-[50%]">

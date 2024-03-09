@@ -12,6 +12,8 @@ import GlobalPlayer from '../components/Media/GlobalPlayer'
 import GlobalAudio from '../components/Media/GlobalAudio/GlobalAudio'
 import React from 'react'
 
+import { ToastProvider } from '@/src/components/Toaster'
+
 const inter = Inter({ subsets: ['latin'] })
 const lato = Lato({ weight: '700', subsets: ['latin'] })
 const cabin = Cabin({ subsets: ['latin'] })
@@ -28,17 +30,17 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
-  console.log({ children })
-
   return (
     <html lang="en">
       <body className={` ${barlow.className}`}>
         <NextAuthProvider>
           <ApolloWrapper>
-            <MainHeader />
-            <div className=" flex justify-center">{children}</div>
-            <GlobalPlayer />
-            <GlobalAudio />
+            <ToastProvider>
+              <MainHeader />
+              <div className=" flex justify-center">{children}</div>
+              <GlobalPlayer />
+              <GlobalAudio />
+            </ToastProvider>
           </ApolloWrapper>
         </NextAuthProvider>
       </body>

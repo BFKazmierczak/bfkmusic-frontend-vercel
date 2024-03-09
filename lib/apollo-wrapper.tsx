@@ -1,6 +1,6 @@
 'use client'
 
-import { ApolloLink, HttpLink } from '@apollo/client'
+import { ApolloLink, HttpLink, from } from '@apollo/client'
 import {
   ApolloNextAppProvider,
   NextSSRApolloClient,
@@ -8,15 +8,13 @@ import {
   SSRMultipartLink
 } from '@apollo/experimental-nextjs-app-support/ssr'
 import { useSession } from 'next-auth/react'
-import { useEffect } from 'react'
+import errorLink from './errorLink'
 
-function makeClient(token: string | undefined) {
-  const headers = token ? { authorization: `Bearer ${token}` } : undefined
-
+function makeClient(token: string) {
   const httpLink = new HttpLink({
     uri: process.env.GRAPHQL_ENDPOINT,
     fetch,
-    headers
+    headers: { authorization: `Bearer ${token}` }
   })
 
   return new NextSSRApolloClient({
@@ -27,19 +25,30 @@ function makeClient(token: string | undefined) {
             new SSRMultipartLink({
               stripDefer: true
             }),
-            httpLink
+            from([errorLink, httpLink])
           ])
-        : httpLink
+        : (() => {
+            const final = from([errorLink, httpLink])
+            return final
+          })()
   })
 }
 
 export function ApolloWrapper({ children }: React.PropsWithChildren) {
   const session = useSession()
 
+  const jwt = session.data?.user?.jwt
+
   return (
-    <ApolloNextAppProvider
-      makeClient={() => makeClient(session.data?.user?.jwt)}>
-      {children}
-    </ApolloNextAppProvider>
+    <>
+      {session.status !== 'loading' ? (
+        <ApolloNextAppProvider
+          makeClient={() => makeClient(session.data?.user?.jwt || '')}>
+          {children}
+        </ApolloNextAppProvider>
+      ) : (
+        <></>
+      )}
+    </>
   )
 }

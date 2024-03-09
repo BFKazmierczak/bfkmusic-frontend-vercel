@@ -2,7 +2,6 @@ import { authOptions } from '@/lib/auth'
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
 import LoginButton from '../components/Buttons/LoginButton'
-import { SessionProvider } from 'next-auth/react'
 
 const HomePage = async () => {
   const session = await getServerSession(authOptions)
