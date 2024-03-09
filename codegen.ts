@@ -2,7 +2,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli'
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: process.env.GRAPHQL_ENDPOINT,
+  schema: 'https://bfkmusic-api.up.railway.app/graphql',
   documents: ['src/**/*.tsx'],
   verbose: true,
   generates: {

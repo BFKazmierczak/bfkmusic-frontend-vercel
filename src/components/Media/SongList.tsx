@@ -102,7 +102,7 @@ const SongList = ({ initialSongs }: SongListProps) => {
                   onClick={handleAdd(Number(song.id))}>
                   <span className=" flex items-center gap-x-1">
                     <AddIcon style={{ fontSize: '1rem' }} />
-                    <span>Do biblioteki</span>
+                    <span className=" hidden sm:visible">Do biblioteki</span>
                   </span>
                 </button>
               )}

@@ -43,7 +43,7 @@ const AuthForm = ({ register, login }: AuthFormProps) => {
 
   console.log(session)
 
-  const { control, handleSubmit, formState } = useForm({
+  const { control, handleSubmit, formState, setError } = useForm({
     defaultValues: {
       username: '',
       email: '',
@@ -82,8 +82,13 @@ const AuthForm = ({ register, login }: AuthFormProps) => {
           redirect: false
         })
 
-        if (!result?.ok && result?.error) {
+        if (result?.error) {
           console.log('Błąd podczas logowania')
+          setError('username', {
+            type: 'server',
+            message:
+              'Nie udało się zalogować. Sprawdź poprawność loginu i hasła.'
+          })
         }
 
         if (result?.ok && result.url) {
