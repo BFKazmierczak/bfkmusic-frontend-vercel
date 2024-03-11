@@ -1,29 +1,56 @@
 'use client'
 
-import { SongEntity } from '@/src/gql/graphql'
+import { SongEntity, SongFiltersHiddenInput } from '@/src/gql/graphql'
 import { SongLibrary } from '.'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { gql, useQuery } from '@apollo/client'
+import { graphql } from '@/src/gql'
+
+const GET_SONGS = graphql(`
+  query GetLibrarySongs($filters: SongFiltersHiddenInput) {
+    songs(filters: $filters) {
+      data {
+        id
+        attributes {
+          createdAt
+          updatedAt
+          publishedAt
+          name
+          description
+          inLibrary
+          isOwned
+          non_owner_visible
+        }
+      }
+    }
+  }
+`)
 
 interface SongLibraryViewProps {
-  initialSongs: SongEntity[]
-  initialOwnedSongs: SongEntity[]
+  initialSongs?: SongEntity[]
 }
 
-const SongLibraryView = ({
-  initialSongs,
-  initialOwnedSongs
-}: SongLibraryViewProps) => {
-  const [songs, setSongs] = useState<SongEntity[]>(initialSongs)
-  const [ownedSongs, setOwnedSongs] = useState<SongEntity[]>(initialOwnedSongs)
+const SongLibraryView = ({ initialSongs }: SongLibraryViewProps) => {
+  const [songs, setSongs] = useState<SongEntity[]>([])
 
-  const [displayedSongs, setDisplayedSongs] = useState<SongEntity[]>(songs)
+  const [filters, setFilters] = useState<SongFiltersHiddenInput>({})
 
   const [selected, setSelected] = useState<'all' | 'bought'>('all')
 
+  const { data, loading } = useQuery(GET_SONGS, {
+    variables: {
+      filters
+    }
+  })
+
   useEffect(() => {
-    if (selected === 'all') setDisplayedSongs(songs)
-    else setDisplayedSongs(ownedSongs)
+    if (data?.songs) setSongs(data.songs.data)
+  }, [data?.songs])
+
+  useEffect(() => {
+    if (selected === 'all') setFilters({ inLibrary: true, isOwned: false })
+    else setFilters({ inLibrary: false, isOwned: true })
   }, [selected])
 
   return (
@@ -33,23 +60,25 @@ const SongLibraryView = ({
 
         <div className=" flex gap-x-5 justify-center">
           <span
-            className={`${selected === 'all' && 'text-pink-600'}`}
+            className={`${
+              selected === 'all' && 'text-pink-600'
+            } cursor-pointer select-none`}
             onClick={() => setSelected('all')}>
             Wszystkie
           </span>
           <span
-            className={`${selected === 'bought' && 'text-pink-600'}`}
+            className={`${
+              selected === 'bought' && 'text-pink-600'
+            } cursor-pointer select-none`}
             onClick={() => setSelected('bought')}>
             Zakupione
           </span>
         </div>
 
         <div className=" flex flex-col gap-y-5">
-          {displayedSongs.length > 0 && (
-            <SongLibrary initialSongs={displayedSongs} />
-          )}
+          {songs.length > 0 && !loading && <SongLibrary songs={songs} />}
           <div className=" flex justify-center px-10">
-            {displayedSongs.length === 0 && (
+            {songs.length === 0 && !loading && (
               <span>
                 Wygląda na to, że w Twojej bibliotece nic nie ma. Odwiedź{' '}
                 <Link
@@ -60,6 +89,8 @@ const SongLibraryView = ({
                 , aby dodać utwory.
               </span>
             )}
+
+            {loading && <span>Wczytywanie danych</span>}
           </div>
         </div>
       </div>

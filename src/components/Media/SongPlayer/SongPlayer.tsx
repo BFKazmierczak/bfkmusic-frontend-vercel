@@ -9,6 +9,8 @@ import AudioSlider from '../AudioSlider/AudioSlider'
 import useHighlightStore from '../../../stores/highlightStore'
 import useGlobalPlayerStore from '@/src/stores/globalPlayerStore'
 import formatTime from '@/src/utils/formatTime'
+import LibraryAddCheckIcon from '@mui/icons-material/LibraryAddCheck'
+import { Tooltip } from '@mui/material'
 
 export interface SongPlayerProps {
   song: SongEntity
@@ -111,9 +113,9 @@ const SongPlayer = ({
         className={` flex w-full flex-col gap-y-2 p-3 overflow-x-hidden ${
           size === 'small' && 'items-start'
         } `}>
-        <div>
+        <div className=" flex gap-x-2 items-center">
           <span
-            className=" flex w-fit bg-purple-500"
+            className=" flex w-fit"
             style={{
               whiteSpace: 'nowrap',
               display: 'flex',
@@ -123,6 +125,12 @@ const SongPlayer = ({
               ? song.attributes?.name
               : song.attributes?.audio?.data[audioIndex].attributes?.name}
           </span>
+
+          {song.attributes?.isOwned && (
+            <Tooltip title="Posiadasz ten utwór" placement="left">
+              <LibraryAddCheckIcon style={{ fontSize: '1rem' }} />
+            </Tooltip>
+          )}
         </div>
 
         {size !== 'small' && (
