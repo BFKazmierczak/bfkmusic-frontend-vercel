@@ -2,6 +2,7 @@ import fetch from 'cross-fetch'
 import { ApolloClient, HttpLink, InMemoryCache, gql } from '@apollo/client'
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { graphql } from '@/src/gql'
 
 function makeClient() {
   const client = new ApolloClient({
@@ -16,7 +17,7 @@ function makeClient() {
   return client
 }
 
-const LOGIN = gql`
+const LOGIN = graphql(`
   mutation Login($username: String!, $password: String!) {
     login(
       input: { identifier: $username, password: $password, provider: "local" }
@@ -26,16 +27,26 @@ const LOGIN = gql`
         id
         username
         email
-        role {
-          id
-          name
-          description
-          type
-        }
       }
     }
   }
-`
+`)
+
+const CHECK_ME = graphql(`
+  query Me {
+    me {
+      id
+      username
+      email
+      role {
+        id
+        name
+        description
+        type
+      }
+    }
+  }
+`)
 
 export const authOptions: NextAuthOptions = {
   pages: {
@@ -73,16 +84,34 @@ export const authOptions: NextAuthOptions = {
         const response = await client.mutate({
           mutation: LOGIN,
           variables: {
-            username: credentials?.username,
-            password: credentials?.password
+            username: `${credentials?.username}`,
+            password: `${credentials?.password}`
           }
         })
 
-        if (response) {
+        if (response && response.data) {
           const data = response.data.login
 
           const jwt = data.jwt
           const destructuredUser = { ...data.user }
+
+          const meResponse = await client.query({
+            query: CHECK_ME,
+            context: {
+              headers: {
+                authorization: `Bearer ${jwt}`
+              }
+            }
+          })
+
+          if (meResponse && meResponse.data.me?.role) {
+            const userWithRole = {
+              ...destructuredUser,
+              role: meResponse.data.me.role
+            }
+
+            return { jwt, ...userWithRole }
+          }
 
           return { jwt, ...destructuredUser }
         }

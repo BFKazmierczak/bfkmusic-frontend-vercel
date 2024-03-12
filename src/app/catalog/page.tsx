@@ -48,6 +48,8 @@ const CatalogPage = async () => {
 
   const songs = result.data.songs?.data as SongEntity[]
 
+  console.log({ songs })
+
   return (
     <>
       <SongList initialSongs={songs} />

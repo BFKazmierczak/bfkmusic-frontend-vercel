@@ -54,15 +54,43 @@ const CREATE_SONG_COMMENT = graphql(`
   }
 `)
 
+const GENERATE_WAVEFORM = graphql(`
+  mutation GenerateWaveform($fileId: Int!) {
+    calculateFileDuration(fileId: $fileId) {
+      data {
+        id
+        attributes {
+          createdAt
+          updatedAt
+          name
+          url
+          duration
+          waveform {
+            data {
+              id
+              attributes {
+                peaks
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`)
+
 export interface CommentRange {
   start: number
   end: number
 }
 
-interface SongPlayerActionProps extends SongPlayerProps {}
+interface SongPlayerActionProps extends SongPlayerProps {
+  admin?: boolean
+}
 
 const SongPlayerAction = ({
   audioIndex = 0,
+  admin = false,
   ...props
 }: SongPlayerActionProps) => {
   const session = useSession()
@@ -81,6 +109,12 @@ const SongPlayerAction = ({
 
   const commentContainerRef = useRef<HTMLDivElement>(null)
   const waveformContainerRef = useRef<HTMLDivElement>(null)
+
+  const [generateWaveform] = useMutation(GENERATE_WAVEFORM, {
+    onCompleted: (data) => {
+      console.log({ data })
+    }
+  })
 
   const [comments, setComments] = useState<CommentEntity[]>(() => {
     const data = props.song.attributes?.comments?.data
@@ -150,13 +184,29 @@ const SongPlayerAction = ({
   return (
     <>
       <SongPlayer {...props} audioIndex={audioIndex}>
-        <div className=" flex flex-row">
+        <div className=" flex flex-col gap-y-1">
           <IconButton
             icon={<AddCommentIcon />}
             onClick={() => {
               setModalOpen(true)
             }}
           />
+
+          {admin && props.song.attributes?.audio?.data[audioIndex]?.id && (
+            <button
+              className=" small-button"
+              onClick={() => {
+                generateWaveform({
+                  variables: {
+                    fileId: Number(
+                      props.song.attributes.audio.data[audioIndex].id
+                    )
+                  }
+                })
+              }}>
+              Wygeneruj przebieg
+            </button>
+          )}
         </div>
       </SongPlayer>
 

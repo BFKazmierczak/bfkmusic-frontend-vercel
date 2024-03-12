@@ -11,6 +11,8 @@ import useGlobalPlayerStore from '@/src/stores/globalPlayerStore'
 import formatTime from '@/src/utils/formatTime'
 import LibraryAddCheckIcon from '@mui/icons-material/LibraryAddCheck'
 import { Tooltip } from '@mui/material'
+import { gql, useMutation } from '@apollo/client'
+import { graphql } from '@/src/gql'
 
 export interface SongPlayerProps {
   song: SongEntity

@@ -1,5 +1,5 @@
 import { onError } from '@apollo/client/link/error'
-import { ToastContainer, toast } from 'react-toastify'
+import { toast } from 'react-toastify'
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
@@ -7,12 +7,11 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       ({ message, locations, path }) => message
     )
 
-    console.log({ messages })
-
-    toast(messages.join(','))
+    toast(messages.join(','), { type: 'error', theme: 'colored' })
   }
 
-  if (networkError) console.error(`[Network error]: ${networkError}`)
+  if (networkError)
+    toast(networkError.message, { type: 'error', theme: 'colored' })
 })
 
 export default errorLink

@@ -57,8 +57,7 @@ const AuthForm = ({ register, login }: AuthFormProps) => {
   const [registerUser] = useMutation(REGISTER_USER, {
     onCompleted: (data) => {
       console.log(data)
-    },
-    onError: (error) => console.log(error)
+    }
   })
 
   const onSubmit: SubmitHandler<IFormInput> = async (data, event) => {
