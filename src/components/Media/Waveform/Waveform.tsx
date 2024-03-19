@@ -53,6 +53,8 @@ const Waveform = ({
   const [startBound, setStartBound] = useState<number>(10)
   const [endBound, setEndBound] = useState<number>(50)
 
+  const [currentBound, setCurrentBound] = useState<'left' | 'right'>('left')
+
   const [movingLeft, setMovingLeft] = useState<boolean>(false)
   const [movingRight, setMovingRight] = useState<boolean>(false)
 
@@ -145,14 +147,6 @@ const Waveform = ({
     }
   }, [currentTime])
 
-  // useEffect(() => {
-  //   // console.log(...visibleRange)
-  // }, [visibleRange])
-
-  useEffect(() => {
-    console.log({ changedManually })
-  }, [changedManually])
-
   useEffect(() => {
     if (onRangeUpdate && containerRef.current) {
       const width = containerRef.current.scrollWidth
@@ -216,44 +210,71 @@ const Waveform = ({
     if (onTimeChange) onTimeChange(newTime)
   }
 
-  function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
-    if (containerRef.current) {
-      if (movingLeft || movingRight) {
-        const boundingRect = containerRef.current.getBoundingClientRect()
-        const bound =
-          event.clientX + event.currentTarget.scrollLeft - boundingRect.left
+  function handleRangeSelection(
+    event: React.MouseEvent<HTMLDivElement>,
+    bound: 'left' | 'right'
+  ) {
+    const boundingRect = event.currentTarget.getBoundingClientRect()
+    const clickedX = event.clientX - boundingRect.left
 
-        console.log({ bound })
+    const scrollLeft = event.currentTarget.scrollLeft
+    const relativeClicked = scrollLeft + clickedX
 
-        const offsetParent = containerRef.current.offsetParent
-
-        if (offsetParent) {
-          const relativeBoundingRect = offsetParent.getBoundingClientRect()
-          const relativeBound = event.clientX - relativeBoundingRect.left
-
-          console.log({ relativeBound })
-
-          const visibleWidth = offsetParent.clientWidth
-
-          const leftThreshold = 80
-          const rightThreshold = visibleWidth - 70
-
-          // get position relative to visibleWidth
-
-          // if (relativeBound > rightThreshold) {
-          //   if (onScroll) onScroll(30)
-          // } else if (relativeBound < leftThreshold) {
-          //   if (onScroll) onScroll(-30)
-          // }
-        }
-
-        if (movingLeft) setStartBound(bound)
-        else if (movingRight) setEndBound(bound)
-      } else if (sliding) {
-        handleWaveformClick(event)
+    if (bound === 'left') {
+      if (relativeClicked > endBound) {
+        setStartBound(endBound)
+        setEndBound(relativeClicked)
+      } else {
+        setStartBound(relativeClicked)
+      }
+    } else {
+      if (relativeClicked <= startBound) {
+        setEndBound(startBound)
+        setStartBound(relativeClicked)
+      } else {
+        setEndBound(relativeClicked)
       }
     }
   }
+
+  // function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
+  //   if (containerRef.current) {
+  //     if (movingLeft || movingRight) {
+  //       const boundingRect = containerRef.current.getBoundingClientRect()
+  //       const bound =
+  //         event.clientX + event.currentTarget.scrollLeft - boundingRect.left
+
+  //       console.log({ bound })
+
+  //       const offsetParent = containerRef.current.offsetParent
+
+  //       if (offsetParent) {
+  //         const relativeBoundingRect = offsetParent.getBoundingClientRect()
+  //         const relativeBound = event.clientX - relativeBoundingRect.left
+
+  //         console.log({ relativeBound })
+
+  //         const visibleWidth = offsetParent.clientWidth
+
+  //         const leftThreshold = 80
+  //         const rightThreshold = visibleWidth - 70
+
+  //         // get position relative to visibleWidth
+
+  //         // if (relativeBound > rightThreshold) {
+  //         //   if (onScroll) onScroll(30)
+  //         // } else if (relativeBound < leftThreshold) {
+  //         //   if (onScroll) onScroll(-30)
+  //         // }
+  //       }
+
+  //       if (movingLeft) setStartBound(bound)
+  //       else if (movingRight) setEndBound(bound)
+  //     } else if (sliding) {
+  //       handleWaveformClick(event)
+  //     }
+  //   }
+  // }
 
   return (
     <div
@@ -264,18 +285,8 @@ const Waveform = ({
       onClick={(event) => {
         if (!isSelectingRange) handleWaveformClick(event)
         else {
-          const boundingRect = event.currentTarget.getBoundingClientRect()
-          const clickedX = event.clientX - boundingRect.left
-
-          const scrollLeft = event.currentTarget.scrollLeft
-          const relativeClicked = scrollLeft + clickedX
-
-          const distanceFromLeft = Math.abs(relativeClicked - startBound)
-          const distanceFromRight = Math.abs(relativeClicked - endBound)
-
-          if (distanceFromLeft <= distanceFromRight)
-            setStartBound(relativeClicked)
-          else setEndBound(relativeClicked)
+          handleRangeSelection(event, currentBound)
+          setCurrentBound((prev) => (prev === 'left' ? 'right' : 'left'))
         }
       }}
       onPointerDown={() => {
@@ -302,11 +313,7 @@ const Waveform = ({
             width: `${endBound - startBound}px`
           }}>
           <div className=" absolute flex justify-center items-center h-24 w-1 bg-pink-800">
-            <MarkerButton
-            // onMouseDown={(event) => {
-            //   setMovingLeft(true)
-            // }}
-            />
+            <MarkerButton highlighted={currentBound === 'left'} />
           </div>
 
           <div
@@ -314,11 +321,7 @@ const Waveform = ({
             style={{ right: `0px` }}>
             <MarkerButton
               direction="right"
-              // onMouseDown={(event) => {
-              //   console.log('mouse down')
-
-              //   setMovingRight(true)
-              // }}
+              highlighted={currentBound === 'right'}
             />
           </div>
         </div>
