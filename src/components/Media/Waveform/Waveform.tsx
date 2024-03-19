@@ -10,16 +10,19 @@ import MarkerButton from './MarkerButton/MarkerButton'
 import usePrevious from '@/src/hooks/usePrevious'
 import { CommentRange } from '../SongPlayerAction/SongPlayerAction'
 
+/** Interface for WaveformProps
+ *
+ *  @param isSelectingRange Indicates whether comment range is currently being selected
+ */
 interface WaveformProps {
   peaks: number[]
-  selecting?: boolean
+  isSelectingRange?: boolean
   selectionBegin?: number
   selectionEnd?: number
   playing?: boolean
   totalTime: number
   currentTime: number
   highlight?: string
-  rangeSelected?: boolean
   onTimeChange?: (newTime: number) => void
   onScroll?: (left: number) => void
   onSlide?: () => void
@@ -28,14 +31,13 @@ interface WaveformProps {
 
 const Waveform = ({
   peaks,
-  selecting,
+  isSelectingRange,
   selectionBegin,
   selectionEnd,
   playing = false,
   totalTime,
   currentTime,
   highlight,
-  rangeSelected = false,
   onTimeChange,
   onScroll,
   onSlide,
@@ -69,7 +71,7 @@ const Waveform = ({
       progCanvasRef.current &&
       containerRef.current
     ) {
-      const totalWidth = containerRef.current.scrollWidth * 5 // let it be wider!
+      const totalWidth = containerRef.current.scrollWidth * 1.5 // let it be wider!
 
       const canvas = canvasRef.current
       const progCanvas = progCanvasRef.current
@@ -130,7 +132,7 @@ const Waveform = ({
           true
         )
 
-      if (!selecting && !rangeSelected) {
+      if (!isSelectingRange) {
         const oneSecondPercentage = 1 / totalTime
         const percentage = currentTime / totalTime
         const width = containerRef.current.scrollWidth
@@ -186,10 +188,10 @@ const Waveform = ({
       if (
         newWidth >= scrollTreshold - scrollTreshold * 0.15 &&
         !shouldCenter &&
-        !selecting
+        !isSelectingRange
       ) {
         containerDiv.scrollBy({ left: diff, behavior: 'instant' })
-      } else if (shouldCenter && !selecting) {
+      } else if (shouldCenter && !isSelectingRange) {
         const scrollValue =
           containerDiv.scrollWidth * timePercentage - visible / 2
 
@@ -257,27 +259,42 @@ const Waveform = ({
     <div
       className={` relative z-[60] ${
         movingLeft || movingRight ? ' overflow-x-hidden' : ' overflow-x-auto'
-      } py-2 bg-green-700 transition-all ease-in-out`}
+      } py-2 bg-green-400 transition-all ease-in-out`}
       ref={containerRef}
       onClick={(event) => {
-        if (!selecting) handleWaveformClick(event)
-      }}
-      onPointerDown={() => {
-        if (!selecting) setSliding(true)
-      }}
-      onPointerUp={(event) => {
-        if (sliding) setSliding(false)
-        else if (selecting) {
-          if (movingLeft) setMovingLeft(false)
-          else if (movingRight) setMovingRight(false)
+        if (!isSelectingRange) handleWaveformClick(event)
+        else {
+          const boundingRect = event.currentTarget.getBoundingClientRect()
+          const clickedX = event.clientX - boundingRect.left
+
+          const scrollLeft = event.currentTarget.scrollLeft
+          const relativeClicked = scrollLeft + clickedX
+
+          const distanceFromLeft = Math.abs(relativeClicked - startBound)
+          const distanceFromRight = Math.abs(relativeClicked - endBound)
+
+          if (distanceFromLeft <= distanceFromRight)
+            setStartBound(relativeClicked)
+          else setEndBound(relativeClicked)
         }
       }}
-      onPointerMove={(event) => {
-        console.log('moving')
+      onPointerDown={() => {
+        if (!isSelectingRange) setSliding(true)
+      }}
+      // onPointerUp={(event) => {
+      //   if (sliding) setSliding(false)
+      //   else if (isSelectingRange) {
+      //     if (movingLeft) setMovingLeft(false)
+      //     else if (movingRight) setMovingRight(false)
+      //   }
+      // }}
+      // onPointerMove={(event) => {
+      //   console.log('moving')
 
-        handleMouseMove(event)
-      }}>
-      {selecting && startBound > 0 && (
+      //   handleMouseMove(event)
+      // }}
+    >
+      {isSelectingRange && startBound > 0 && (
         <div
           className=" absolute z-[60] h-24 w-full bg-pink-500 bg-opacity-50"
           style={{
@@ -286,9 +303,9 @@ const Waveform = ({
           }}>
           <div className=" absolute flex justify-center items-center h-24 w-1 bg-pink-800">
             <MarkerButton
-              onMouseDown={(event) => {
-                setMovingLeft(true)
-              }}
+            // onMouseDown={(event) => {
+            //   setMovingLeft(true)
+            // }}
             />
           </div>
 
@@ -297,11 +314,11 @@ const Waveform = ({
             style={{ right: `0px` }}>
             <MarkerButton
               direction="right"
-              onMouseDown={(event) => {
-                console.log('mouse down')
+              // onMouseDown={(event) => {
+              //   console.log('mouse down')
 
-                setMovingRight(true)
-              }}
+              //   setMovingRight(true)
+              // }}
             />
           </div>
         </div>

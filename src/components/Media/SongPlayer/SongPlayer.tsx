@@ -20,6 +20,7 @@ export interface SongPlayerProps {
   size?: 'small' | 'normal'
   showMainName?: boolean
   children?: ReactNode
+  admin?: boolean
 }
 
 const SongPlayer = ({
@@ -27,7 +28,8 @@ const SongPlayer = ({
   audioIndex = 0,
   size = 'normal',
   showMainName = false,
-  children
+  children,
+  admin = false
 }: SongPlayerProps) => {
   const {
     songData,

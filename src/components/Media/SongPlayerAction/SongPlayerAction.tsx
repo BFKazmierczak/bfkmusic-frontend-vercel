@@ -135,7 +135,6 @@ const SongPlayerAction = ({
     start: 0,
     end: 0
   })
-  const [rangeSelected, setRangeSelected] = useState<boolean>(false)
 
   const peaks =
     props.song.attributes?.audio?.data[audioIndex].attributes?.waveform?.data
@@ -199,7 +198,7 @@ const SongPlayerAction = ({
                 generateWaveform({
                   variables: {
                     fileId: Number(
-                      props.song.attributes.audio.data[audioIndex].id
+                      props.song.attributes?.audio?.data[audioIndex].id
                     )
                   }
                 })
@@ -229,8 +228,7 @@ const SongPlayerAction = ({
                   totalTime={duration}
                   currentTime={currentTime}
                   peaks={peaks}
-                  selecting={rangeSelection}
-                  rangeSelected={rangeSelected}
+                  isSelectingRange={rangeSelection}
                   onTimeChange={changeTime}
                   onScroll={(left) => {
                     if (waveformContainerRef.current) {
@@ -263,7 +261,6 @@ const SongPlayerAction = ({
                     className=" flex justify-center items-center z-[40] px-1 gap-x-1 text-white bg-pink-500 cursor-pointer"
                     onClick={() => {
                       setRangeSelection((prev) => !prev)
-                      setRangeSelected(true)
                     }}>
                     {rangeSelection ? (
                       'Zatwierdź zakres'
