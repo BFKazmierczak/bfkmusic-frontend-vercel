@@ -4,10 +4,9 @@ import { SongEntity } from '@/src/gql/graphql'
 import SongPlayer from './SongPlayer/SongPlayer'
 
 import AddIcon from '@mui/icons-material/Add'
-import CheckIcon from '@mui/icons-material/Check'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
 import { useMutation } from '@apollo/client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { graphql } from '@/src/gql'
 import { useSession } from 'next-auth/react'
 

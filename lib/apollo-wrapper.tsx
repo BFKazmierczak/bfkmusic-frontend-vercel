@@ -1,22 +1,29 @@
 'use client'
 
-import { ApolloLink, HttpLink, from } from '@apollo/client'
+import { HttpLink, from, useApolloClient } from '@apollo/client'
 import {
   ApolloNextAppProvider,
   NextSSRApolloClient,
-  NextSSRInMemoryCache,
-  SSRMultipartLink
+  NextSSRInMemoryCache
 } from '@apollo/experimental-nextjs-app-support/ssr'
 import { useSession } from 'next-auth/react'
 import errorLink from './errorLink'
+import { ReactNode, useEffect, useRef, useState } from 'react'
+import { setContext } from '@apollo/client/link/context'
 
-function makeClient(token: string) {
-  console.log('making client...')
+function makeClient() {
+  const authLink = setContext(async (_, { headers, token }) => {
+    return {
+      headers: {
+        ...headers,
+        ...(token ? { authorization: `Bearer ${token}` } : {})
+      }
+    }
+  })
 
   const httpLink = new HttpLink({
     uri: process.env.GRAPHQL_ENDPOINT,
-    fetch,
-    headers: { authorization: `Bearer ${token}` }
+    fetch
   })
 
   return new NextSSRApolloClient({
@@ -29,35 +36,35 @@ function makeClient(token: string) {
         errorPolicy: 'all'
       }
     },
-    link:
-      typeof window === 'undefined'
-        ? ApolloLink.from([
-            new SSRMultipartLink({
-              stripDefer: true
-            }),
-            from([errorLink, httpLink])
-          ])
-        : (() => from([errorLink, httpLink]))()
+    link: authLink.concat(from([errorLink, httpLink]))
   })
 }
 
 export function ApolloWrapper({ children }: React.PropsWithChildren) {
   const session = useSession()
 
-  const jwt = session.data?.user?.jwt
-
-  console.log({ jwt })
-
   return (
     <>
-      {session.status !== 'loading' ? (
-        <ApolloNextAppProvider
-          makeClient={() => makeClient(session.data?.user?.jwt || '')}>
-          {children}
+      {session.status === 'loading' && <></>}
+
+      {session.status !== 'loading' && (
+        <ApolloNextAppProvider makeClient={() => makeClient()}>
+          <UpdateAuth>{children}</UpdateAuth>
         </ApolloNextAppProvider>
-      ) : (
-        <></>
       )}
     </>
   )
+}
+
+function UpdateAuth({ children }: { children: ReactNode }) {
+  const session = useSession()
+
+  const apolloClient = useApolloClient()
+
+  useEffect(() => {
+    if (session.data?.user.jwt)
+      apolloClient.defaultContext.token = session.data.user.jwt
+  }, [session.data?.user.jwt])
+
+  return <>{children}</>
 }

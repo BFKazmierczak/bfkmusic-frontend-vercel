@@ -94,14 +94,12 @@ const SongPage = async ({ params }: SongPageProps) => {
       }
     })
 
-    const songData = songQuery.data.song?.data
-
-    console.log(songData?.attributes?.comments?.data)
+    const songData = songQuery?.data?.song?.data
 
     if (!songData)
       return (
-        <div className=" flex justify-center items-center  bg-red-500">
-          Nie odnaleziono utworu
+        <div className=" flex justify-center items-center text-red-500">
+          Nie udało się pozyskać utworu
         </div>
       )
 
