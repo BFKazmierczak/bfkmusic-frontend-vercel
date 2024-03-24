@@ -9,6 +9,7 @@ import {
 import MarkerButton from './MarkerButton/MarkerButton'
 import usePrevious from '@/src/hooks/usePrevious'
 import { CommentRange } from '../SongPlayerAction/SongPlayerAction'
+import { CustomHighlightType } from '@/src/stores/highlightStore'
 
 /** Interface for WaveformProps
  *
@@ -22,7 +23,7 @@ interface WaveformProps {
   playing?: boolean
   totalTime: number
   currentTime: number
-  highlight?: string
+  highlight?: CustomHighlightType
   onTimeChange?: (newTime: number) => void
   onScroll?: (left: number) => void
   onSlide?: () => void
@@ -325,6 +326,22 @@ const Waveform = ({
             />
           </div>
         </div>
+      )}
+
+      {highlight && (
+        <div
+          className=" absolute z-[60] h-24 w-full bg-orange-600 bg-opacity-50"
+          style={{
+            left: `${
+              (highlight.timeRange.begin / totalTime) *
+              containerRef.current?.scrollWidth
+            }px`,
+            width: `${
+              (highlight.timeRange.begin / totalTime) *
+              containerRef.current?.scrollWidth
+            }px`
+          }}
+        />
       )}
 
       <div className=" relative">

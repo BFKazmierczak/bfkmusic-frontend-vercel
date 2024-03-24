@@ -142,9 +142,9 @@ const SongPlayer = ({
             <AudioSlider
               totalTime={audioDuration}
               currentTime={innerTime}
-              highlight={
-                highlight[1] === Number(file?.id) ? highlight[0] : undefined
-              }
+              // highlight={
+              //   highlight[1] === Number(file?.id) ? highlight[0] : undefined
+              // }
               onTimeChange={(newTime) => {
                 console.log('time change!')
                 changeTime(newTime)

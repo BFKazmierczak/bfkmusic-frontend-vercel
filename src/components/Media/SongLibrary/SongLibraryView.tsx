@@ -80,7 +80,8 @@ const SongLibraryView = ({ initialSongs }: SongLibraryViewProps) => {
           <div className=" flex justify-center px-10">
             {songs.length === 0 && !loading && (
               <span>
-                Wygląda na to, że w Twojej bibliotece nic nie ma. Odwiedź{' '}
+                Wygląda na to, że w Twojej bibliotece nie ma żadnej muzyki.
+                Odwiedź{' '}
                 <Link
                   className=" font-bold text-pink-600 hover:text-pink-700 active:text-pink-800"
                   href="/catalog">

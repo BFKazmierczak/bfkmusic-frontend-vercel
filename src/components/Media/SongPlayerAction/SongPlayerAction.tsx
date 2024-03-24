@@ -18,6 +18,7 @@ import { graphql } from '@/src/gql'
 import Waveform from '../Waveform/Waveform'
 import useGlobalPlayerStore from '@/src/stores/globalPlayerStore'
 import formatTime from '@/src/utils/formatTime'
+import getTimeRangeNumberArray from '@/src/utils/getTimeRangeNumberArray'
 
 const CREATE_SONG_COMMENT = graphql(`
   mutation CreateComment(
@@ -105,7 +106,7 @@ const SongPlayerAction = ({
     source
   } = useGlobalPlayerStore()
 
-  const { setHighlight } = useHighlightStore()
+  const { highlight, setHighlight } = useHighlightStore()
 
   const commentContainerRef = useRef<HTMLDivElement>(null)
   const waveformContainerRef = useRef<HTMLDivElement>(null)
@@ -166,6 +167,10 @@ const SongPlayerAction = ({
     }
   }, [comments])
 
+  useEffect(() => {
+    console.log('Highlight effect:', highlight)
+  }, [highlight])
+
   function handleCreateComment(event: React.MouseEvent<HTMLButtonElement>) {
     const songId = props.song.id as string
     const fileId = props.song.attributes?.audio?.data[audioIndex].id
@@ -213,7 +218,7 @@ const SongPlayerAction = ({
         open={modalOpen}
         onClose={() => {
           setModalOpen(false)
-          setHighlight([undefined, undefined])
+          setHighlight(undefined)
         }}>
         <>
           <div
@@ -227,6 +232,7 @@ const SongPlayerAction = ({
                 <Waveform
                   totalTime={duration}
                   currentTime={currentTime}
+                  highlight={highlight}
                   peaks={peaks}
                   isSelectingRange={rangeSelection}
                   onTimeChange={changeTime}
@@ -328,8 +334,25 @@ const SongPlayerAction = ({
                             userId={session.data?.user?.id}
                             selected={comment.id === selectedComment}
                             onSelect={(id, timeRange) => {
+                              console.log({ timeRange })
+
+                              const arr = timeRange.split(':')
+
+                              if (arr.length === 2) {
+                                const newArr = arr.map((value) => Number(value))
+
+                                if (!isNaN(newArr[0]) && !isNaN(newArr[1])) {
+                                  setHighlight({
+                                    timeRange: {
+                                      begin: newArr[0],
+                                      end: newArr[1]
+                                    },
+                                    fileId: Number(id)
+                                  })
+                                } else setHighlight(undefined)
+                              } else setHighlight(undefined)
+
                               setSelectedComment(id)
-                              setHighlight([timeRange, Number(file.id)])
                             }}
                           />
                         )

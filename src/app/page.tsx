@@ -20,7 +20,7 @@ const HomePage = async () => {
 
       <DebugButton />
 
-      {session && session.user.role.name}
+      {session?.user.role?.name && session.user.role.name}
 
       {session === null && (
         <div className=" flex flex-col items-center gap-y-2 mt-5">

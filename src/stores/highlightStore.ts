@@ -1,21 +1,34 @@
 import { create } from 'zustand'
 
-type HighlightType =
-  | [timeRange: string, fileId: number]
-  | [timeRange: undefined, fileId: undefined]
+// type CustomHighlightType =
+//   | [timeRange: string, fileId: number]
+//   | [timeRange: undefined, fileId: undefined]
+
+export type CustomHighlightType =
+  | {
+      timeRange: {
+        begin: number
+        end: number
+      }
+      fileId: number
+    }
+  | undefined
 
 type HighlightStore = {
-  highlight: HighlightType
-  setHighlight: (state: HighlightType) => void
+  highlight: CustomHighlightType
+  setHighlight: (state: CustomHighlightType) => void
 }
 
 const useHighlightStore = create<HighlightStore>()((set) => ({
-  highlight: [undefined, undefined],
-  setHighlight: ([timeRange, fileId]) =>
+  highlight: undefined,
+  setHighlight: (highlight) =>
     set((state) => {
-      if (timeRange === undefined && fileId === undefined) {
-        return { highlight: [undefined, undefined] }
-      } else return { highlight: [timeRange, fileId] }
+      return {
+        highlight: {
+          timeRange: highlight?.timeRange,
+          fileId: highlight?.fileId
+        }
+      }
     })
 }))
 
