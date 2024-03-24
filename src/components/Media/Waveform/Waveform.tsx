@@ -1,11 +1,4 @@
-import {
-  Ref,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react'
+import { useEffect, useRef, useState } from 'react'
 import MarkerButton from './MarkerButton/MarkerButton'
 import usePrevious from '@/src/hooks/usePrevious'
 import { CommentRange } from '../SongPlayerAction/SongPlayerAction'
@@ -51,8 +44,8 @@ const Waveform = ({
   const [visibleRange, setVisibleRange] = useState<[number, number]>([0, 0])
   const [changedManually, setChangedManually] = useState<boolean>(false)
 
-  const [startBound, setStartBound] = useState<number>(10)
-  const [endBound, setEndBound] = useState<number>(50)
+  const [startBound, setStartBound] = useState<number>(0)
+  const [endBound, setEndBound] = useState<number>(0)
 
   const [currentBound, setCurrentBound] = useState<'left' | 'right'>('left')
 
@@ -331,16 +324,21 @@ const Waveform = ({
       {highlight && (
         <div
           className=" absolute z-[60] h-24 w-full bg-orange-600 bg-opacity-50"
-          style={{
-            left: `${
-              (highlight.timeRange.begin / totalTime) *
-              containerRef.current?.scrollWidth
-            }px`,
-            width: `${
-              (highlight.timeRange.begin / totalTime) *
-              containerRef.current?.scrollWidth
-            }px`
-          }}
+          style={
+            highlight && containerRef.current?.scrollWidth
+              ? {
+                  left: `${
+                    (highlight.timeRange.begin / totalTime) *
+                    containerRef.current.scrollWidth
+                  }px`,
+                  width: `${
+                    ((highlight.timeRange.end - highlight.timeRange.begin) /
+                      totalTime) *
+                    containerRef.current.scrollWidth
+                  }px`
+                }
+              : {}
+          }
         />
       )}
 

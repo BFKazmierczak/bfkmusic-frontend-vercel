@@ -180,7 +180,10 @@ const SongPlayerAction = ({
         content: commentValue,
         songId: Number(songId),
         fileId: Number(fileId),
-        timeRange: { from: 30, to: 40 }
+        timeRange: {
+          from: Math.round(commentRange.start),
+          to: Math.round(commentRange.end)
+        }
       }
     })
   }
@@ -222,152 +225,155 @@ const SongPlayerAction = ({
         }}>
         <>
           <div
-            className={` absolute inset-5 p-5 bg-white border-2 border-gray-500 shadow-xl ${
+            className={` md:flex md:gap-x-5 absolute inset-5 p-5 bg-white border-2 border-gray-500 shadow-xl ${
               modalOpen ? 'bg-opacity-100' : 'bg-opacity-0'
             } overflow-y-auto transition-all ease-in-out`}>
-            {peaks && (
-              <div
-                className=" relative w-full sm:w-[600px] lg:w-[800px]"
-                ref={waveformContainerRef}>
-                <Waveform
-                  totalTime={duration}
-                  currentTime={currentTime}
-                  highlight={highlight}
-                  peaks={peaks}
-                  isSelectingRange={rangeSelection}
-                  onTimeChange={changeTime}
-                  onScroll={(left) => {
-                    if (waveformContainerRef.current) {
-                      waveformContainerRef.current.scrollBy({
-                        left,
-                        behavior: 'smooth'
-                      })
-                    }
-                  }}
-                  onRangeUpdate={(newRange) => {
-                    setCommentRange(newRange)
-                  }}
-                />
-              </div>
-            )}
+            <div className=" flex flex-col">
+              {peaks && (
+                <div
+                  className=" relative w-full sm:w-[600px] lg:w-[800px]"
+                  ref={waveformContainerRef}>
+                  <Waveform
+                    totalTime={duration}
+                    currentTime={currentTime}
+                    highlight={highlight}
+                    peaks={peaks}
+                    isSelectingRange={rangeSelection}
+                    onTimeChange={changeTime}
+                    onScroll={(left) => {
+                      if (waveformContainerRef.current) {
+                        waveformContainerRef.current.scrollBy({
+                          left,
+                          behavior: 'smooth'
+                        })
+                      }
+                    }}
+                    onRangeUpdate={(newRange) => {
+                      console.log('on range update!', { newRange })
+                      setCommentRange(newRange)
+                    }}
+                  />
+                </div>
+              )}
 
-            <SongPlayer {...props} size="small" />
-            <div className=" flex flex-col gap-y-5 mt-5">
-              <div className=" flex flex-col gap-y-2">
-                <textarea
-                  className=" basic-input w-full resize-none"
-                  rows={2}
-                  placeholder="Napisz komentarz..."
-                  value={commentValue}
-                  onChange={(event) => setCommentValue(event.target.value)}
-                />
+              <SongPlayer {...props} size="small" />
+              <div className=" flex flex-col gap-y-5 mt-5">
+                <div className=" flex flex-col md:flex-row md:gap-x-2 gap-y-2">
+                  <textarea
+                    className=" basic-input w-full resize-none"
+                    rows={2}
+                    placeholder="Napisz komentarz..."
+                    value={commentValue}
+                    onChange={(event) => setCommentValue(event.target.value)}
+                  />
 
-                <div className=" flex flex-col gap-y-1">
-                  <span
-                    className=" flex justify-center items-center z-[40] px-1 gap-x-1 text-white bg-pink-500 cursor-pointer"
-                    onClick={() => {
-                      setRangeSelection((prev) => !prev)
-                    }}>
-                    {rangeSelection ? (
-                      'Zatwierdź zakres'
-                    ) : (
-                      <>
-                        <SettingsEthernetIcon /> Zakres komentarza
-                      </>
-                    )}
-                  </span>
-
-                  <div className=" flex gap-x-1 justify-between z-[40] bg-white">
-                    <span className=" flex z-[40]">
-                      Od: {formatTime(commentRange.start)}
+                  <div className=" flex flex-col gap-y-1">
+                    <span
+                      className=" flex justify-center items-center z-[40] px-1 gap-x-1 text-white bg-pink-500 cursor-pointer"
+                      onClick={() => {
+                        setRangeSelection((prev) => !prev)
+                      }}>
+                      {rangeSelection ? (
+                        'Zatwierdź zakres'
+                      ) : (
+                        <>
+                          <SettingsEthernetIcon /> Wyznacz zakres
+                        </>
+                      )}
                     </span>
 
-                    <span className=" flex z-[40]">
-                      Do: {formatTime(commentRange.end)}
-                    </span>
+                    <div className=" flex gap-x-1 justify-between z-[40] bg-white">
+                      <span className=" flex z-[40]">
+                        Od: {formatTime(commentRange.start)}
+                      </span>
+
+                      <span className=" flex z-[40]">
+                        Do: {formatTime(commentRange.end)}
+                      </span>
+                    </div>
+
+                    <button
+                      className=" basic-button"
+                      disabled={commentValue.length === 0}
+                      onClick={handleCreateComment}>
+                      Dodaj komentarz
+                    </button>
                   </div>
                 </div>
-
-                <button
-                  className=" basic-button"
-                  disabled={commentValue.length === 0}
-                  onClick={handleCreateComment}>
-                  Dodaj komentarz
-                </button>
               </div>
+            </div>
 
-              <div className=" flex flex-col gap-y-2">
-                <span className=" font-bold text-lg">Dyskusja</span>
+            <div className=" flex flex-col gap-y-2">
+              <span className=" font-bold text-lg">Dyskusja</span>
 
-                <div className=" flex justify-center">
-                  <div
-                    className=" relative flex flex-col sm:items-center gap-y-5 w-full sm:w-fit h-[50vh] overflow-y-auto"
-                    ref={commentContainerRef}
-                    onScroll={(event) => {
-                      const eTarget = event.target as HTMLElement
+              <div className=" flex justify-center">
+                <div
+                  className=" relative flex flex-col sm:items-center gap-y-5 w-full sm:w-fit h-[50vh] overflow-y-auto"
+                  ref={commentContainerRef}
+                  onScroll={(event) => {
+                    const eTarget = event.target as HTMLElement
 
-                      setScrolLPosition(eTarget.scrollTop)
-                    }}>
-                    {commentContainerRef.current &&
-                      comments.length > 1 &&
-                      commentContainerRef.current?.scrollTop > 0 && (
-                        <div className=" sticky flex justify-center items-center top-0 w-full bg-neutral-100 text-neutral-500 shadow-xl">
-                          <ArrowDropUpIcon style={{ fontSize: '1rem' }} />
-                        </div>
-                      )}
+                    setScrolLPosition(eTarget.scrollTop)
+                  }}>
+                  {commentContainerRef.current &&
+                    comments.length > 1 &&
+                    commentContainerRef.current?.scrollTop > 0 && (
+                      <div className=" sticky flex justify-center items-center top-0 w-full bg-neutral-100 text-neutral-500 shadow-xl">
+                        <ArrowDropUpIcon style={{ fontSize: '1rem' }} />
+                      </div>
+                    )}
 
-                    {comments
-                      .toSorted((a, b) => {
-                        if (a.attributes?.createdAt > b.attributes?.createdAt)
-                          return -1
-                        else if (
-                          a.attributes?.createdAt < b.attributes?.createdAt
-                        )
-                          return 1
-                        else return 0
-                      })
-                      .map((comment, index) => {
-                        return (
-                          <CommentBox
-                            key={comment.id}
-                            data={comment}
-                            userId={session.data?.user?.id}
-                            selected={comment.id === selectedComment}
-                            onSelect={(id, timeRange) => {
-                              console.log({ timeRange })
+                  {comments
+                    .toSorted((a, b) => {
+                      if (a.attributes?.createdAt > b.attributes?.createdAt)
+                        return -1
+                      else if (
+                        a.attributes?.createdAt < b.attributes?.createdAt
+                      )
+                        return 1
+                      else return 0
+                    })
+                    .map((comment, index) => {
+                      return (
+                        <CommentBox
+                          key={comment.id}
+                          data={comment}
+                          userId={session.data?.user?.id}
+                          selected={comment.id === selectedComment}
+                          onSelect={(id, timeRange) => {
+                            console.log({ timeRange })
 
-                              const arr = timeRange.split(':')
+                            const arr = timeRange.split(':')
 
-                              if (arr.length === 2) {
-                                const newArr = arr.map((value) => Number(value))
+                            if (arr.length === 2) {
+                              const newArr = arr.map((value) => Number(value))
 
-                                if (!isNaN(newArr[0]) && !isNaN(newArr[1])) {
-                                  setHighlight({
-                                    timeRange: {
-                                      begin: newArr[0],
-                                      end: newArr[1]
-                                    },
-                                    fileId: Number(id)
-                                  })
-                                } else setHighlight(undefined)
+                              if (!isNaN(newArr[0]) && !isNaN(newArr[1])) {
+                                setHighlight({
+                                  timeRange: {
+                                    begin: Math.round(newArr[0]),
+                                    end: Math.round(newArr[1])
+                                  },
+                                  fileId: Number(id)
+                                })
                               } else setHighlight(undefined)
+                            } else setHighlight(undefined)
 
-                              setSelectedComment(id)
-                            }}
-                          />
-                        )
-                      })}
+                            setSelectedComment(id)
+                          }}
+                        />
+                      )
+                    })}
 
-                    {commentContainerRef.current &&
-                      comments.length > 1 &&
-                      commentContainerRef.current?.scrollTop !==
-                        commentContainerRef.current.scrollHeight -
-                          commentContainerRef.current.clientHeight && (
-                        <div className=" sticky flex justify-center items-center bottom-0 w-full bg-neutral-100 text-neutral-500">
-                          <ArrowDropDownIcon style={{ fontSize: '1rem' }} />
-                        </div>
-                      )}
-                  </div>
+                  {commentContainerRef.current &&
+                    comments.length > 1 &&
+                    commentContainerRef.current?.scrollTop !==
+                      commentContainerRef.current.scrollHeight -
+                        commentContainerRef.current.clientHeight && (
+                      <div className=" sticky flex justify-center items-center bottom-0 w-full bg-neutral-100 text-neutral-500">
+                        <ArrowDropDownIcon style={{ fontSize: '1rem' }} />
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
