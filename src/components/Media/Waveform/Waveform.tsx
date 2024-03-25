@@ -3,6 +3,7 @@ import MarkerButton from './MarkerButton/MarkerButton'
 import usePrevious from '@/src/hooks/usePrevious'
 import { CommentRange } from '../SongPlayerAction/SongPlayerAction'
 import { CustomHighlightType } from '@/src/stores/highlightStore'
+import formatTime from '@/src/utils/formatTime'
 
 /** Interface for WaveformProps
  *
@@ -77,6 +78,8 @@ const Waveform = ({
 
       canvas.width = totalWidth
       progCanvas.width = totalWidth
+      canvas.height = 80
+      progCanvas.height = 80
 
       if (ctx && progCtx) {
         ctx.fillStyle = '#fbcfe8'
@@ -299,6 +302,16 @@ const Waveform = ({
       //   handleMouseMove(event)
       // }}
     >
+      <div className=" flex gap-x-1 fixed text-white bg-neutral-500 bg-opacity-75 z-[100]">
+        <span className=" flex justify-center w-10">
+          {formatTime(currentTime)}
+        </span>
+        <span className=" flex justify-center w-2">-</span>
+        <span className=" flex justify-center w-10">
+          {formatTime(totalTime)}
+        </span>
+      </div>
+
       {isSelectingRange && startBound > 0 && (
         <div
           className=" absolute z-[60] h-24 w-full bg-pink-500 bg-opacity-50"
