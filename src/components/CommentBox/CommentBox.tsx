@@ -21,9 +21,7 @@ const CommentBox = ({ data, userId, selected, onSelect }: CommentBoxProps) => {
   return (
     <div
       className={` flex flex-col gap-y-1 shadow-md p-3
-        w-full md:w-[40rem] ${
-          userId === data.attributes?.user?.data?.id && 'bg-pink-100'
-        } ${
+        w-full ${userId === data.attributes?.user?.data?.id && 'bg-pink-100'} ${
         selected && ' outline -outline-offset-2 outline-pink-700'
       } cursor-pointer`}
       ref={commentRef}

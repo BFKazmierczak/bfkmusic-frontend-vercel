@@ -123,6 +123,8 @@ const SongPlayerAction = ({
     else return []
   })
 
+  const [addingComment, setAddingComment] = useState<boolean>(false)
+
   const [modalOpen, setModalOpen] = useState<boolean>(false)
   const [selectedComment, setSelectedComment] = useState<string>()
 
@@ -157,6 +159,8 @@ const SongPlayerAction = ({
           if (prev.length === 0) return [newComment as CommentEntity]
           else return [newComment as CommentEntity, ...prev]
         })
+
+        setAddingComment(false)
       }
     }
   })
@@ -225,14 +229,12 @@ const SongPlayerAction = ({
         }}>
         <>
           <div
-            className={` md:flex md:gap-x-5 absolute inset-5 p-5 bg-white border-2 border-gray-500 shadow-xl ${
+            className={` lg:flex lg:gap-x-5 absolute inset-5 p-5 bg-white border-2 border-gray-500 shadow-xl ${
               modalOpen ? 'bg-opacity-100' : 'bg-opacity-0'
             } overflow-y-auto transition-all ease-in-out`}>
-            <div className=" flex flex-col">
+            <div className=" flex flex-col lg:w-[50%]">
               {peaks && (
-                <div
-                  className=" relative w-full sm:w-[600px] lg:w-[800px]"
-                  ref={waveformContainerRef}>
+                <div className=" relative w-full" ref={waveformContainerRef}>
                   <Waveform
                     totalTime={duration}
                     currentTime={currentTime}
@@ -257,58 +259,78 @@ const SongPlayerAction = ({
               )}
 
               <SongPlayer {...props} size="small" />
-              <div className=" flex flex-col gap-y-5 mt-5">
-                <div className=" flex flex-col md:flex-row md:gap-x-2 gap-y-2">
-                  <textarea
-                    className=" basic-input w-full resize-none"
-                    rows={2}
-                    placeholder="Napisz komentarz..."
-                    value={commentValue}
-                    onChange={(event) => setCommentValue(event.target.value)}
-                  />
-
-                  <div className=" flex flex-col gap-y-1">
-                    <span
-                      className=" flex justify-center items-center z-[40] px-1 gap-x-1 text-white bg-pink-500 cursor-pointer"
-                      onClick={() => {
-                        setRangeSelection((prev) => !prev)
-                      }}>
-                      {rangeSelection ? (
-                        'Zatwierdź zakres'
-                      ) : (
-                        <>
-                          <SettingsEthernetIcon /> Wyznacz zakres
-                        </>
-                      )}
-                    </span>
-
-                    <div className=" flex gap-x-1 justify-between z-[40] bg-white">
-                      <span className=" flex z-[40]">
-                        Od: {formatTime(commentRange.start)}
+              <div className=" flex flex-col mt-5">
+                <div
+                  className=" relative flex justify-center bg-pink-600 font-bold text-white py-1 select-none"
+                  onClick={() => setAddingComment((prev) => !prev)}>
+                  {addingComment && <span> Anuluj dodawanie</span>}
+                  {!addingComment && <span>Dodaj komentarz</span>}
+                </div>
+                <div
+                  className=" shadow-lg 
+                    overflow-hidden duration-500"
+                  style={
+                    addingComment
+                      ? {
+                          maxHeight: '13rem',
+                          transition: 'max-height 0.35s ease-out'
+                        }
+                      : {
+                          maxHeight: '0rem',
+                          transition: 'max-height 0.35s ease-in'
+                        }
+                  }>
+                  <div className=" flex flex-col sm:flex-row sm:gap-x-5 gap-y-2 w-full p-3 bg-neutral-100">
+                    <textarea
+                      className=" basic-input w-full resize-none"
+                      rows={2}
+                      placeholder="Napisz komentarz..."
+                      value={commentValue}
+                      onChange={(event) => setCommentValue(event.target.value)}
+                    />
+                    <div className=" flex flex-col gap-y-1">
+                      <span
+                        className=" flex justify-center items-center z-[40] px-1 gap-x-1 text-white bg-pink-500 cursor-pointer"
+                        onClick={() => {
+                          setRangeSelection((prev) => !prev)
+                        }}>
+                        {rangeSelection ? (
+                          'Zatwierdź zakres'
+                        ) : (
+                          <>
+                            <SettingsEthernetIcon /> Wyznacz zakres
+                          </>
+                        )}
                       </span>
 
-                      <span className=" flex z-[40]">
-                        Do: {formatTime(commentRange.end)}
-                      </span>
+                      <div className=" flex gap-x-1 justify-between z-[40] bg-white">
+                        <span className=" flex z-[40]">
+                          Od: {formatTime(commentRange.start)}
+                        </span>
+
+                        <span className=" flex z-[40]">
+                          Do: {formatTime(commentRange.end)}
+                        </span>
+                      </div>
+
+                      <button
+                        className=" basic-button"
+                        disabled={commentValue.length === 0}
+                        onClick={handleCreateComment}>
+                        Dodaj komentarz
+                      </button>
                     </div>
-
-                    <button
-                      className=" basic-button"
-                      disabled={commentValue.length === 0}
-                      onClick={handleCreateComment}>
-                      Dodaj komentarz
-                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className=" flex flex-col gap-y-2">
+            <div className=" flex flex-col gap-y-2 lg:w-[50%]">
               <span className=" font-bold text-lg">Dyskusja</span>
 
               <div className=" flex justify-center">
                 <div
-                  className=" relative flex flex-col sm:items-center gap-y-5 w-full sm:w-fit h-[50vh] overflow-y-auto"
+                  className=" relative flex flex-col sm:items-center gap-y-5 w-full h-[50vh] overflow-y-auto"
                   ref={commentContainerRef}
                   onScroll={(event) => {
                     const eTarget = event.target as HTMLElement
