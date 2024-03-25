@@ -161,6 +161,11 @@ const SongPlayerAction = ({
         })
 
         setAddingComment(false)
+        setCommentValue('')
+        setCommentRange({
+          start: 0,
+          end: 0
+        })
       }
     }
   })
@@ -174,6 +179,17 @@ const SongPlayerAction = ({
   useEffect(() => {
     console.log('Highlight effect:', highlight)
   }, [highlight])
+
+  useEffect(() => {
+    if (addingComment) setHighlight(undefined)
+    else {
+      setCommentValue('')
+      setCommentRange({
+        start: 0,
+        end: 0
+      })
+    }
+  }, [addingComment])
 
   function handleCreateComment(event: React.MouseEvent<HTMLButtonElement>) {
     const songId = props.song.id as string
