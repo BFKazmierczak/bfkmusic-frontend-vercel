@@ -19,7 +19,7 @@ import Waveform from '../Waveform/Waveform'
 import useGlobalPlayerStore from '@/src/stores/globalPlayerStore'
 import formatTime from '@/src/utils/formatTime'
 import getTimeRangeNumberArray from '@/src/utils/getTimeRangeNumberArray'
-import { useRouter } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 
 const CREATE_SONG_COMMENT = graphql(`
   mutation CreateComment(
@@ -95,8 +95,11 @@ const SongPlayerAction = ({
   admin = false,
   ...props
 }: SongPlayerActionProps) => {
-  const router = useRouter()
   const session = useSession()
+  const pathname = usePathname()
+  const queryParams = useSearchParams()
+
+  const showDetails = queryParams?.get('showDetails')
 
   const {
     songData,
@@ -189,6 +192,11 @@ const SongPlayerAction = ({
     }
   }, [addingComment])
 
+  useEffect(() => {
+    if (showDetails === 'true') setModalOpen(true)
+    else setModalOpen(false)
+  }, [showDetails])
+
   function handleCreateComment(event: React.MouseEvent<HTMLButtonElement>) {
     const songId = props.song.id as string
     const fileId = props.song.attributes?.audio?.data[audioIndex].id
@@ -214,6 +222,13 @@ const SongPlayerAction = ({
             icon={<AddCommentIcon />}
             onClick={() => {
               setModalOpen(true)
+              window.history.pushState(
+                {
+                  showDetails: true
+                },
+                '',
+                `${pathname}?showDetails=true`
+              )
             }}
           />
 
@@ -240,6 +255,14 @@ const SongPlayerAction = ({
         onClose={() => {
           setModalOpen(false)
           setHighlight(undefined)
+
+          window.history.replaceState(
+            {
+              showDetails: false
+            },
+            '',
+            pathname
+          )
         }}>
         <>
           <div
