@@ -19,6 +19,7 @@ import Waveform from '../Waveform/Waveform'
 import useGlobalPlayerStore from '@/src/stores/globalPlayerStore'
 import formatTime from '@/src/utils/formatTime'
 import getTimeRangeNumberArray from '@/src/utils/getTimeRangeNumberArray'
+import { useRouter } from 'next/navigation'
 
 const CREATE_SONG_COMMENT = graphql(`
   mutation CreateComment(
@@ -94,6 +95,7 @@ const SongPlayerAction = ({
   admin = false,
   ...props
 }: SongPlayerActionProps) => {
+  const router = useRouter()
   const session = useSession()
 
   const {
@@ -175,10 +177,6 @@ const SongPlayerAction = ({
       commentContainerRef.current?.scrollTo({ top: 0 })
     }
   }, [comments])
-
-  useEffect(() => {
-    console.log('Highlight effect:', highlight)
-  }, [highlight])
 
   useEffect(() => {
     if (addingComment) setHighlight(undefined)
@@ -297,16 +295,9 @@ const SongPlayerAction = ({
                         }
                   }>
                   <div className=" flex flex-col sm:flex-row sm:gap-x-5 gap-y-2 w-full p-3 bg-neutral-100">
-                    <textarea
-                      className=" basic-input w-full resize-none"
-                      rows={2}
-                      placeholder="Napisz komentarz..."
-                      value={commentValue}
-                      onChange={(event) => setCommentValue(event.target.value)}
-                    />
                     <div className=" flex flex-col gap-y-1">
                       <span
-                        className=" flex justify-center items-center z-[40] px-1 gap-x-1 text-white bg-pink-500 cursor-pointer"
+                        className=" flex justify-center items-center z-[40] px-1 gap-x-1 text-white bg-pink-400 cursor-pointer"
                         onClick={() => {
                           setRangeSelection((prev) => !prev)
                         }}>
@@ -328,14 +319,22 @@ const SongPlayerAction = ({
                           Do: {formatTime(commentRange.end)}
                         </span>
                       </div>
-
-                      <button
-                        className=" basic-button"
-                        disabled={commentValue.length === 0}
-                        onClick={handleCreateComment}>
-                        Dodaj komentarz
-                      </button>
                     </div>
+
+                    <textarea
+                      className=" basic-input w-full resize-none"
+                      rows={2}
+                      placeholder="Napisz komentarz..."
+                      value={commentValue}
+                      onChange={(event) => setCommentValue(event.target.value)}
+                    />
+
+                    <button
+                      className=" basic-button"
+                      disabled={commentValue.length === 0}
+                      onClick={handleCreateComment}>
+                      Dodaj komentarz
+                    </button>
                   </div>
                 </div>
               </div>
