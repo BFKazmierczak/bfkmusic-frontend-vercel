@@ -23,12 +23,7 @@ const useHighlightStore = create<HighlightStore>()((set) => ({
   highlight: undefined,
   setHighlight: (highlight) =>
     set((state) => {
-      return {
-        highlight: {
-          timeRange: highlight?.timeRange,
-          fileId: highlight?.fileId
-        }
-      }
+      return { highlight }
     })
 }))
 
