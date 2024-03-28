@@ -92,7 +92,7 @@ const SongList = ({ initialSongs }: SongListProps) => {
 
         if (audioData && audioData.length > 0) {
           return (
-            <SongPlayer key={song.id} song={song}>
+            <SongPlayer key={song.id} song={song} showMainName>
               {song.attributes?.inLibrary ? (
                 <span className=" flex items-center w-fit h-7 gap-x-1 text-sm select-none font-bold text-pink-600">
                   <CheckBoxIcon style={{ fontSize: '1.25rem' }} />

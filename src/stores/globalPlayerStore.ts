@@ -41,25 +41,27 @@ const useGlobalPlayerStore = create<GlobalPlayerStore>()((set) => ({
   },
   playSong: (newSongData, time = 0, audioIndex = 0) => {
     set((state) => {
-      const newSrc =
-        newSongData.attributes?.audio?.data[audioIndex].attributes?.url
+      if (state.songData?.id === newSongData.id) {
+        return { currentTime: time, playing: true }
+      } else {
+        const newSrc =
+          newSongData.attributes?.audio?.data[audioIndex].attributes?.url
 
-      const duration =
-        newSongData.attributes?.audio?.data[audioIndex].attributes?.duration
+        const duration =
+          newSongData.attributes?.audio?.data[audioIndex].attributes?.duration
 
-      if (state.current && newSrc) {
-        state.current.src = newSrc
-        state.current.currentTime = time
-      }
+        if (state.current && newSrc) {
+          state.current.src = newSrc
+          state.current.currentTime = time
+        }
 
-      console.log('playing...')
-
-      return {
-        songData: newSongData,
-        currentTime: time,
-        source: newSrc,
-        duration: duration ? duration : 0,
-        playing: true
+        return {
+          songData: newSongData,
+          currentTime: time,
+          source: newSrc,
+          duration: duration ? duration : 0,
+          playing: true
+        }
       }
     })
   },
@@ -75,7 +77,8 @@ const useGlobalPlayerStore = create<GlobalPlayerStore>()((set) => ({
   endSong: () =>
     set((state) => ({
       playing: false,
-      currentTime: 0
+      currentTime: 0,
+      currentFormattedTime: formatTime(0)
     })),
   currentTime: 0,
   setCurrentTime: (newTime) => {

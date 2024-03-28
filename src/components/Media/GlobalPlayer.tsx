@@ -9,18 +9,6 @@ import useGlobalPlayerStore from '@/src/stores/globalPlayerStore'
 import formatTime from '@/src/utils/formatTime'
 
 const GlobalPlayer = () => {
-  // const {
-  //   songData,
-  //   playing,
-  //   play,
-  //   pause,
-  //   playSong,
-  //   changeTime,
-  //   currentFormattedTime,
-  //   currentTime,
-  //   duration
-  // } = useGlobalPlayer()
-
   const {
     songData,
     playing,

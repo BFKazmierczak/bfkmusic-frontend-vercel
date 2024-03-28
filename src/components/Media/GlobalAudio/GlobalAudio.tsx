@@ -21,7 +21,7 @@ const GlobalAudio = memo(() => {
     if (source.length > 0 && audioRef.current) {
       if (playing) audioRef.current.play()
     }
-  }, [source])
+  }, [source, playing])
 
   function handleTimeUpdate() {
     if (audioRef.current) {
