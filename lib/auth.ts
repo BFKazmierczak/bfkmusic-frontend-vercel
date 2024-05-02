@@ -3,6 +3,22 @@ import { ApolloClient, HttpLink, InMemoryCache, gql } from '@apollo/client'
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { graphql } from '@/src/gql'
+import { JWT } from 'next-auth/jwt'
+
+function parseJwt(token: string) {
+  const base64Url = token.split('.')[1]
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      })
+      .join('')
+  )
+
+  return JSON.parse(jsonPayload)
+}
 
 function makeClient() {
   const client = new ApolloClient({
@@ -19,30 +35,14 @@ function makeClient() {
 
 const LOGIN = graphql(`
   mutation Login($username: String!, $password: String!) {
-    login(
-      input: { identifier: $username, password: $password, provider: "local" }
-    ) {
-      jwt
+    userLogin(username: $username, password: $password) {
+      token
       user {
         id
         username
+        firstName
+        lastName
         email
-      }
-    }
-  }
-`)
-
-const CHECK_ME = graphql(`
-  query Me {
-    me {
-      id
-      username
-      email
-      role {
-        id
-        name
-        description
-        type
       }
     }
   }
@@ -53,26 +53,31 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login'
   },
   session: {
-    strategy: 'jwt' // JSON Web Token
+    strategy: 'jwt', // JSON Web Token
+    maxAge: 2 * 60 * 60 - 120
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, user }) {
-      const newToken = {
-        ...token,
-        ...user
+      if (user) {
+        const decodedPayload = parseJwt(user.jwt)
+        token = { ...user, ...decodedPayload }
       }
 
-      return newToken
+      return token
     },
     async session({ session, user, token }) {
-      return { ...session, user: token }
+      if (token) {
+        session.user = token.user
+      }
+
+      return session
     }
   },
   providers: [
     CredentialsProvider({
-      id: 'strapi',
-      name: 'StrapiLogin',
+      id: 'cred',
+      name: 'CredentialsLogin',
       credentials: {
         username: { label: 'Username', type: 'text' },
         password: { label: 'Password', type: 'password' }
@@ -90,30 +95,14 @@ export const authOptions: NextAuthOptions = {
         })
 
         if (response && response.data) {
-          const data = response.data.login
+          const data = response.data.userLogin
 
-          const jwt = data.jwt
-          const destructuredUser = { ...data.user }
+          const jwt = data.token
+          const user = { ...data.user }
 
-          const meResponse = await client.query({
-            query: CHECK_ME,
-            context: {
-              headers: {
-                authorization: `Bearer ${jwt}`
-              }
-            }
-          })
+          const authorizedUser = { jwt, user }
 
-          if (meResponse && meResponse.data.me?.role) {
-            const userWithRole = {
-              ...destructuredUser,
-              role: meResponse.data.me.role
-            }
-
-            return { jwt, ...userWithRole }
-          }
-
-          return { jwt, ...destructuredUser }
+          return authorizedUser
         }
 
         return null
