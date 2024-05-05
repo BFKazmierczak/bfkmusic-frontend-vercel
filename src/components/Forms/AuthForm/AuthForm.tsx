@@ -3,11 +3,13 @@
 import BasicInput from '@/src/components/Inputs/BasicInput/BasicInput'
 import { gql, useMutation } from '@apollo/client'
 import { CircularProgress } from '@mui/material'
+import { error } from 'console'
 import { signIn, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
+import { toast } from 'react-toastify'
 
 const REGISTER_USER = gql`
   mutation Register(
@@ -97,12 +99,12 @@ const AuthForm = ({ register, login }: AuthFormProps) => {
         })
 
         if (result?.error) {
-          console.log('Błąd podczas logowania')
+          toast(result.error, { theme: 'colored', type: 'error' })
           setError('username', {
             type: 'server',
-            message:
-              'Nie udało się zalogować. Sprawdź poprawność loginu i hasła.'
+            message: 'Nie udało się zalogować.'
           })
+          setLoading(false)
         }
 
         if (result?.ok && result.url) {
@@ -266,7 +268,10 @@ const AuthForm = ({ register, login }: AuthFormProps) => {
             />
           )}
 
-          <button className=" mt-5 basic-button w-full" type="submit">
+          <button
+            className=" mt-5 basic-button w-full"
+            disabled={loading}
+            type="submit">
             {register && 'Załóż konto'}
             {login && !loading && 'Zaloguj'}
             {login && loading && (

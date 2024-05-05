@@ -13,7 +13,6 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  mutation Login($username: String!, $password: String!) {\n    userLogin(username: $username, password: $password) {\n      token\n      user {\n        id\n        username\n        firstName\n        lastName\n        email\n      }\n    }\n  }\n": types.LoginDocument,
     "\n  query GetSongs($first: Int) {\n    allSongs(first: $first) {\n      edges {\n        cursor\n        node {\n          id\n          createdAt\n          updatedAt\n          publishedAt\n          name\n          description\n          inLibrary\n          isFavorite\n          audioFiles {\n            id\n            createdAt\n            updatedAt\n            uploadedBy {\n              id\n              username\n              email\n            }\n            name\n            description\n            duration\n            waveform\n            file\n          }\n        }\n      }\n    }\n  }\n": types.GetSongsDocument,
     "\n  query GetSong($songId: ID!) {\n    song(songId: $songId) {\n      id\n      createdAt\n      updatedAt\n      publishedAt\n      inLibrary\n      isFavorite\n      name\n      description\n      audioFiles {\n        id\n        createdAt\n        updatedAt\n        uploadedBy {\n          id\n          username\n        }\n        name\n        description\n        duration\n        waveform\n        file\n        comments {\n          id\n          createdAt\n          updatedAt\n          content\n          user {\n            id\n            username\n          }\n          startTime\n          endTime\n        }\n      }\n    }\n  }\n": types.GetSongDocument,
     "\n  mutation Register(\n    $username: String!\n    $firstName: String\n    $lastName: String\n    $email: String!\n    $password: String!\n  ) {\n    userRegister(\n      email: $email\n      firstName: $firstName\n      lastName: $lastName\n      password: $password\n      username: $username\n    ) {\n      success\n    }\n  }\n": types.RegisterDocument,
@@ -35,10 +34,6 @@ const documents = {
  */
 export function graphql(source: string): unknown;
 
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation Login($username: String!, $password: String!) {\n    userLogin(username: $username, password: $password) {\n      token\n      user {\n        id\n        username\n        firstName\n        lastName\n        email\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation Login($username: String!, $password: String!) {\n    userLogin(username: $username, password: $password) {\n      token\n      user {\n        id\n        username\n        firstName\n        lastName\n        email\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

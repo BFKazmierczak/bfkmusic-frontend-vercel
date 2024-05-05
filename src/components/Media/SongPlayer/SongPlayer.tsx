@@ -43,38 +43,37 @@ const SongPlayer = ({
   const [innerTime, setInnerTime] = useState<number>(0)
   const [innerFormattedTime, setInnerFormattedTime] = useState<string>('0:00')
 
+  const thisPlaying = useMemo(() => {
+    return song?.audioFiles[audioIndex]?.file === source
+  }, [source])
+
   const audioDuration = useMemo((): number => {
-    const data = song?.audioFiles[audioIndex]
+    if (song.audioFiles && song.audioFiles.length) {
+      const data = song.audioFiles[audioIndex]
 
-    if (data) return data.duration as number
-    else return 0
+      return (data?.duration as number) ?? 0
+    }
+
+    return 0
   }, [song])
-
-  const file = song?.audioFiles[audioIndex]
 
   useEffect(() => {
     if (thisPlaying) {
       if (playing) setLocalPlaying(true)
       else setLocalPlaying(false)
     }
-  }, [playing])
+  }, [thisPlaying, playing])
 
   useEffect(() => {
     if (thisPlaying) {
       setInnerTime(currentTime)
       setInnerFormattedTime(formatTime(currentTime))
     }
-  }, [currentTime])
+  }, [thisPlaying, currentTime])
 
   useEffect(() => {
-    const innerSsource = song?.audioFiles[audioIndex]?.file
-
     if (thisPlaying) setLocalPlaying(true)
     else setLocalPlaying(false)
-  }, [source])
-
-  const thisPlaying = useMemo(() => {
-    return song?.audioFiles[audioIndex]?.file === source
   }, [source])
 
   return (
@@ -113,7 +112,7 @@ const SongPlayer = ({
             }}>
             {showMainName && song?.name}
             {!showMainName &&
-              (song?.audioFiles[audioIndex]?.name.length > 1
+              ((song?.audioFiles[audioIndex]?.name.length as number) > 1
                 ? song?.audioFiles[audioIndex]?.name
                 : 'Plik bez nazwy')}
           </span>

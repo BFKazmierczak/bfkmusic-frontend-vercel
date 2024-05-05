@@ -63,10 +63,10 @@ function UpdateAuth({ children }: { children: ReactNode }) {
   const apolloClient = useApolloClient()
 
   useEffect(() => {
-    if (session.data?.token.jwt) {
+    if (apolloClient.defaultContext && session.data?.token.jwt) {
       apolloClient.defaultContext.token = session.data.token.jwt
     }
-  }, [session.data?.token.jwt])
+  }, [apolloClient.defaultContext, session.data?.token.jwt])
 
   return <>{children}</>
 }

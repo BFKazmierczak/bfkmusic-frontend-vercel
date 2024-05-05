@@ -11,7 +11,8 @@ const config: CodegenConfig = {
       plugins: [],
       config: {
         addUnderscoreToArgsType: true,
-        maybeValue: 'T'
+        maybeValue: 'T',
+        avoidOptionals: true
       }
     },
     './graphql.schema.json': {

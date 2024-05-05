@@ -120,9 +120,7 @@ const SongPlayerAction = ({
   // })
 
   const [comments, setComments] = useState<CommentType[]>(() => {
-    const data = props.song.audioFiles[audioIndex]?.comments
-    if (data) return data
-    return []
+    return props.song.audioFiles[audioIndex]?.comments as CommentType[]
   })
 
   const [addingComment, setAddingComment] = useState<boolean>(false)
@@ -191,7 +189,7 @@ const SongPlayerAction = ({
         end: 0
       })
     }
-  }, [addingComment])
+  }, [setHighlight, addingComment])
 
   useEffect(() => {
     if (showDetails) {
@@ -202,7 +200,9 @@ const SongPlayerAction = ({
         castedParam >= 0
       ) {
         setModalOpen(true)
-        setComments(props.song?.audioFiles[castedParam]?.comments)
+        setComments(
+          props.song?.audioFiles[castedParam]?.comments as CommentType[]
+        )
       } else setModalOpen(false)
     } else {
       setModalOpen(false)
@@ -211,18 +211,20 @@ const SongPlayerAction = ({
   }, [showDetails])
 
   function handleCreateComment(event: React.MouseEvent<HTMLButtonElement>) {
-    const songId = props.song.id as string
-    const audioId = props.song.audioFiles[showDetails].id
+    if (showDetails) {
+      const songId = props.song.id as string
+      const audioId = props.song.audioFiles[Number(showDetails)]?.id as string
 
-    createComment({
-      variables: {
-        content: commentValue,
-        songId,
-        audioId,
-        startTime: Math.round(commentRange.start),
-        endTime: Math.round(commentRange.end)
-      }
-    })
+      createComment({
+        variables: {
+          content: commentValue,
+          songId,
+          audioId,
+          startTime: Math.round(commentRange.start),
+          endTime: Math.round(commentRange.end)
+        }
+      })
+    }
   }
 
   return (

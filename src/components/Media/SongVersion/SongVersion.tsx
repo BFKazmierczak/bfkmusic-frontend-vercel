@@ -1,15 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { SongEntity, UploadFileEntity } from '@/src/gql/graphql'
+import { SongType, AudioType } from '@/src/gql/graphql'
 
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import PauseIcon from '@mui/icons-material/Pause'
 import useGlobalPlayerStore from '@/src/stores/globalPlayerStore'
 
 interface SongVersionProps {
-  song: SongEntity
-  audio: UploadFileEntity
+  song: SongType
+  audio: AudioType
   audioIndex?: number
 }
 

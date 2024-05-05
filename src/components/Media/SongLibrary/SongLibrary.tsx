@@ -1,6 +1,6 @@
 'use client'
 
-import { SongEntity } from '@/src/gql/graphql'
+import { SongType } from '@/src/gql/graphql'
 import { useState } from 'react'
 import SongPlayer from '../SongPlayer/SongPlayer'
 import { useRouter } from 'next/navigation'
@@ -9,7 +9,7 @@ import { gql, useMutation } from '@apollo/client'
 import { graphql } from '@/src/gql'
 
 interface SongLibraryProps {
-  songs: SongEntity[]
+  songs: SongType[]
 }
 
 const SongLibrary = ({ songs }: SongLibraryProps) => {
@@ -19,14 +19,9 @@ const SongLibrary = ({ songs }: SongLibraryProps) => {
   return (
     <div className=" flex flex-col gap-y-2 max-h-fit overflow-y-auto px-5 bg-green-200">
       {songs.map((song) => (
-        <SongPlayer
-          key={song.id}
-          song={song}
-          size="small"
-          showMainName
-          admin={session.data?.user.role.name === 'Admin'}>
+        <SongPlayer key={song.id} song={song} size="small" showMainName>
           <div className=" flex flex-col gap-y-1">
-            {song.attributes?.isOwned && (
+            {song?.inLibrary && (
               <span className=" font-bold text-pink-600 select-none">
                 <button
                   className=" small-button"

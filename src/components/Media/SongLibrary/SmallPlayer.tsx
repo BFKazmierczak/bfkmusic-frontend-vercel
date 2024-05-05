@@ -1,10 +1,10 @@
-import { SongEntity } from '@/src/gql/graphql'
+import { SongType } from '@/src/gql/graphql'
 
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import PauseIcon from '@mui/icons-material/Pause'
 
 interface SmallPlayerProps {
-  song: SongEntity
+  song: SongType
   playing: boolean
   onPause: () => void
 }

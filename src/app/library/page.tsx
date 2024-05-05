@@ -1,6 +1,6 @@
 import { getClient } from '@/lib/client'
 import { SongLibraryView } from '@/src/components/Media/SongLibrary'
-import { SongEntity } from '@/src/gql/graphql'
+import { SongType } from '@/src/gql/graphql'
 // import { GET_LIBRARY } from './queries'
 
 async function LibraryPage() {

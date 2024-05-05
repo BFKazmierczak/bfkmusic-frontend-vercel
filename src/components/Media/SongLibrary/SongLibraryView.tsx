@@ -1,6 +1,6 @@
 'use client'
 
-import { SongEntity, SongFiltersHiddenInput } from '@/src/gql/graphql'
+import { SongType } from '@/src/gql/graphql'
 import { SongLibrary } from '.'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -28,13 +28,11 @@ import { graphql } from '@/src/gql'
 // `)
 
 interface SongLibraryViewProps {
-  initialSongs?: SongEntity[]
+  initialSongs?: SongType[]
 }
 
 const SongLibraryView = ({ initialSongs }: SongLibraryViewProps) => {
-  const [songs, setSongs] = useState<SongEntity[]>([])
-
-  const [filters, setFilters] = useState<SongFiltersHiddenInput>({})
+  const [songs, setSongs] = useState<SongType[]>([])
 
   const [selected, setSelected] = useState<'all' | 'bought'>('all')
 
@@ -75,7 +73,7 @@ const SongLibraryView = ({ initialSongs }: SongLibraryViewProps) => {
           </span>
         </div>
 
-        <div className=" flex flex-col gap-y-5">
+        {/* <div className=" flex flex-col gap-y-5">
           {songs.length > 0 && !loading && <SongLibrary songs={songs} />}
           <div className=" flex justify-center px-10">
             {songs.length === 0 && !loading && (
@@ -93,7 +91,7 @@ const SongLibraryView = ({ initialSongs }: SongLibraryViewProps) => {
 
             {loading && <span>Wczytywanie danych</span>}
           </div>
-        </div>
+        </div> */}
       </div>
     </>
   )

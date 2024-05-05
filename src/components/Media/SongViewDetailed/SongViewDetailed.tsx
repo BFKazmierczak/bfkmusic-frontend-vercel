@@ -39,10 +39,10 @@ const SongViewDetailed = ({ song }: SongHistoryProps) => {
           </span>
         )}
 
-        {song.audioFiles?.map((audio, index) => {
+        {song.audioFiles.map((audio, index) => {
           if (index > 0) {
             return (
-              <div className=" px-5">
+              <div className=" px-5" key={audio?.id}>
                 <span className=" text-sm text-neutral-500">
                   Dodano{' '}
                   <span className=" font-bold text-neutral-600">

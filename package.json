@@ -51,6 +51,7 @@
     "@graphql-codegen/typescript": "^4.0.1",
     "@graphql-codegen/typescript-react-apollo": "^4.1.0",
     "@parcel/watcher": "^2.3.0",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "eslint-plugin-react-hooks": "^4.6.2"
   }
 }
