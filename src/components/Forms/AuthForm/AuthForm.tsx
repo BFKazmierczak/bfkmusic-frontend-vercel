@@ -2,29 +2,37 @@
 
 import BasicInput from '@/src/components/Inputs/BasicInput/BasicInput'
 import { gql, useMutation } from '@apollo/client'
-import { getSession, signIn, useSession } from 'next-auth/react'
+import { CircularProgress } from '@mui/material'
+import { signIn, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 
 const REGISTER_USER = gql`
-  mutation Register($username: String!, $email: String!, $password: String!) {
-    register(
-      input: { username: $username, email: $email, password: $password }
+  mutation Register(
+    $username: String!
+    $firstName: String
+    $lastName: String
+    $email: String!
+    $password: String!
+  ) {
+    userRegister(
+      email: $email
+      firstName: $firstName
+      lastName: $lastName
+      password: $password
+      username: $username
     ) {
-      jwt
-      user {
-        id
-        username
-        email
-        confirmed
-      }
+      success
     }
   }
 `
 
 interface IFormInput {
   username: string
+  firstName: string
+  lastName: string
   email: string
   password: string
   retypePassword: string
@@ -41,11 +49,13 @@ const AuthForm = ({ register, login }: AuthFormProps) => {
   const router = useRouter()
   const session = useSession()
 
-  console.log(session)
+  const [loading, setLoading] = useState<boolean>(false)
 
   const { control, handleSubmit, formState, setError } = useForm({
     defaultValues: {
       username: '',
+      firstName: '',
+      lastName: '',
       email: '',
       password: '',
       retypePassword: ''
@@ -56,25 +66,30 @@ const AuthForm = ({ register, login }: AuthFormProps) => {
 
   const [registerUser] = useMutation(REGISTER_USER, {
     onCompleted: (data) => {
-      console.log(data)
+      router.push('/login?registered=true')
     }
   })
 
   const onSubmit: SubmitHandler<IFormInput> = async (data, event) => {
-    console.log('submit called')
     event?.preventDefault()
+
+    if (loading) return
+
+    setLoading(true)
 
     if (register) {
       registerUser({
         variables: {
           username: data.username,
+          firstName: data.firstName,
+          lastName: data.lastName,
           email: data.email,
           password: data.password
         }
       })
     } else if (login) {
       try {
-        const result = await signIn('strapi', {
+        const result = await signIn('cred', {
           username: data.username,
           password: data.password,
           callbackUrl: 'http://localhost:3000/',
@@ -129,6 +144,48 @@ const AuthForm = ({ register, login }: AuthFormProps) => {
               </>
             )}
           />
+
+          {register && (
+            <div className=" flex gap-x-2">
+              <Controller
+                name="firstName"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    {formState.errors.firstName && (
+                      <p className=" text-pink-600">
+                        {formState.errors.firstName.message}
+                      </p>
+                    )}
+                    <BasicInput
+                      {...field}
+                      placeholder="Imię"
+                      error={formState.errors.firstName !== undefined}
+                    />
+                  </>
+                )}
+              />
+
+              <Controller
+                name="lastName"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    {formState.errors.lastName && (
+                      <p className=" text-pink-600">
+                        {formState.errors.lastName.message}
+                      </p>
+                    )}
+                    <BasicInput
+                      {...field}
+                      placeholder="Nazwisko"
+                      error={formState.errors.lastName !== undefined}
+                    />
+                  </>
+                )}
+              />
+            </div>
+          )}
 
           {register && (
             <Controller
@@ -211,7 +268,12 @@ const AuthForm = ({ register, login }: AuthFormProps) => {
 
           <button className=" mt-5 basic-button w-full" type="submit">
             {register && 'Załóż konto'}
-            {login && 'Zaloguj'}
+            {login && !loading && 'Zaloguj'}
+            {login && loading && (
+              <span className=" flex justify-center">
+                <CircularProgress size={24} style={{ color: 'white' }} />
+              </span>
+            )}
           </button>
         </div>
       </form>

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import IconButton from '../../Buttons/IconButton'
 import SongPlayer, { SongPlayerProps } from '../SongPlayer/SongPlayer'
 
-import AddCommentIcon from '@mui/icons-material/AddComment'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import CommentBox from '../../CommentBox/CommentBox'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -13,73 +13,70 @@ import useHighlightStore from '../../../stores/highlightStore'
 import { Modal } from '@mui/material'
 import { useSession } from 'next-auth/react'
 import { gql, useMutation } from '@apollo/client'
-import { CommentEntity, UploadFileEntity } from '@/src/gql/graphql'
+import { AudioType, CommentType } from '@/src/gql/graphql'
 import { graphql } from '@/src/gql'
 import Waveform from '../Waveform/Waveform'
 import useGlobalPlayerStore from '@/src/stores/globalPlayerStore'
 import formatTime from '@/src/utils/formatTime'
 import getTimeRangeNumberArray from '@/src/utils/getTimeRangeNumberArray'
 import { usePathname, useSearchParams } from 'next/navigation'
+import { toast } from 'react-toastify'
 
-const CREATE_SONG_COMMENT = graphql(`
+const CREATE_COMMENT = graphql(`
   mutation CreateComment(
+    $songId: ID!
+    $audioId: ID!
     $content: String!
-    $songId: Int!
-    $fileId: Int!
-    $timeRange: TimeRange!
+    $startTime: Int!
+    $endTime: Int!
   ) {
-    createComment(
-      data: {
-        content: $content
-        songId: $songId
-        fileId: $fileId
-        timeRange: $timeRange
-      }
+    commentCreate(
+      songId: $songId
+      audioId: $audioId
+      content: $content
+      startTime: $startTime
+      endTime: $endTime
     ) {
-      data {
+      comment {
         id
-        attributes {
-          content
-          fileId
-          timeRange
-          user {
-            data {
-              id
-              attributes {
-                username
-              }
-            }
-          }
+        createdAt
+        updatedAt
+        content
+        startTime
+        endTime
+        user {
+          id
+          username
         }
       }
     }
   }
 `)
 
-const GENERATE_WAVEFORM = graphql(`
-  mutation GenerateWaveform($fileId: Int!) {
-    calculateFileDuration(fileId: $fileId) {
-      data {
-        id
-        attributes {
-          createdAt
-          updatedAt
-          name
-          url
-          duration
-          waveform {
-            data {
-              id
-              attributes {
-                peaks
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`)
+// const GENERATE_WAVEFORM = graphql(`
+//   mutation GenerateWaveform($fileId: Int!) {
+//     calculateFileDuration(fileId: $fileId) {
+//       data {
+//         id
+//         attributes {
+//           createdAt
+//           updatedAt
+//           name
+//           url
+//           duration
+//           waveform {
+//             data {
+//               id
+//               attributes {
+//                 peaks
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
+// `)
 
 export interface CommentRange {
   start: number
@@ -116,16 +113,16 @@ const SongPlayerAction = ({
   const commentContainerRef = useRef<HTMLDivElement>(null)
   const waveformContainerRef = useRef<HTMLDivElement>(null)
 
-  const [generateWaveform] = useMutation(GENERATE_WAVEFORM, {
-    onCompleted: (data) => {
-      console.log({ data })
-    }
-  })
+  // const [generateWaveform] = useMutation(GENERATE_WAVEFORM, {
+  //   onCompleted: (data) => {
+  //     console.log({ data })
+  //   }
+  // })
 
-  const [comments, setComments] = useState<CommentEntity[]>(() => {
-    const data = props.song.attributes?.comments?.data
+  const [comments, setComments] = useState<CommentType[]>(() => {
+    const data = props.song.audioFiles[audioIndex]?.comments
     if (data) return data
-    else return []
+    return []
   })
 
   const [addingComment, setAddingComment] = useState<boolean>(false)
@@ -144,25 +141,29 @@ const SongPlayerAction = ({
     end: 0
   })
 
-  const peaks =
-    props.song.attributes?.audio?.data[audioIndex].attributes?.waveform?.data
-      ?.attributes?.peaks
+  const [peaks] = useState(() => {
+    const waveformString = props.song.audioFiles[audioIndex]?.waveform
+    return waveformString
+      .substring(2, waveformString.length - 2)
+      .split(',')
+      .map(Number)
+  })
 
-  const file = props.song.attributes?.audio?.data[
-    audioIndex
-  ] as UploadFileEntity
-
-  const duration = props.song.attributes?.audio?.data[audioIndex].attributes
-    ?.duration as number
-
-  const [createComment] = useMutation(CREATE_SONG_COMMENT, {
+  const [duration] = useState(() => props.song.audioFiles[audioIndex]?.duration)
+  const [createComment] = useMutation(CREATE_COMMENT, {
     onCompleted: (data) => {
-      const newComment = data.createComment?.data
+      const newComment = data.commentCreate?.comment
 
       if (newComment) {
         setComments((prev) => {
-          if (prev.length === 0) return [newComment as CommentEntity]
-          else return [newComment as CommentEntity, ...prev]
+          if (prev.length === 0) return [newComment as CommentType]
+          else return [newComment as CommentType, ...prev]
+        })
+
+        toast('Dodano komentarz', {
+          theme: 'colored',
+          type: 'success',
+          autoClose: 1000
         })
 
         setAddingComment(false)
@@ -193,23 +194,33 @@ const SongPlayerAction = ({
   }, [addingComment])
 
   useEffect(() => {
-    if (showDetails === 'true') setModalOpen(true)
-    else setModalOpen(false)
+    if (showDetails) {
+      const castedParam = Number(showDetails)
+      if (
+        castedParam !== undefined &&
+        !isNaN(castedParam) &&
+        castedParam >= 0
+      ) {
+        setModalOpen(true)
+        setComments(props.song?.audioFiles[castedParam]?.comments)
+      } else setModalOpen(false)
+    } else {
+      setModalOpen(false)
+      setComments([])
+    }
   }, [showDetails])
 
   function handleCreateComment(event: React.MouseEvent<HTMLButtonElement>) {
     const songId = props.song.id as string
-    const fileId = props.song.attributes?.audio?.data[audioIndex].id
+    const audioId = props.song.audioFiles[showDetails].id
 
     createComment({
       variables: {
         content: commentValue,
-        songId: Number(songId),
-        fileId: Number(fileId),
-        timeRange: {
-          from: Math.round(commentRange.start),
-          to: Math.round(commentRange.end)
-        }
+        songId,
+        audioId,
+        startTime: Math.round(commentRange.start),
+        endTime: Math.round(commentRange.end)
       }
     })
   }
@@ -217,37 +228,24 @@ const SongPlayerAction = ({
   return (
     <>
       <SongPlayer {...props} audioIndex={audioIndex}>
-        <div className=" flex flex-col gap-y-1">
-          <IconButton
-            icon={<AddCommentIcon />}
-            onClick={() => {
-              setModalOpen(true)
-              window.history.pushState(
-                {
-                  showDetails: true
-                },
-                '',
-                `${pathname}?showDetails=true`
-              )
-            }}
-          />
-
-          {admin && props.song.attributes?.audio?.data[audioIndex]?.id && (
-            <button
-              className=" small-button"
+        {props.song.inLibrary && (
+          <div className=" flex flex-col gap-y-1 text-sm">
+            <IconButton
+              icon={<MoreHorizIcon />}
               onClick={() => {
-                generateWaveform({
-                  variables: {
-                    fileId: Number(
-                      props.song.attributes?.audio?.data[audioIndex].id
-                    )
-                  }
-                })
+                setModalOpen(true)
+                window.history.pushState(
+                  {
+                    showDetails: audioIndex
+                  },
+                  '',
+                  `${pathname}?showDetails=${audioIndex}`
+                )
               }}>
-              Wygeneruj przebieg
-            </button>
-          )}
-        </div>
+              Więcej
+            </IconButton>
+          </div>
+        )}
       </SongPlayer>
 
       <Modal
@@ -258,7 +256,7 @@ const SongPlayerAction = ({
 
           window.history.replaceState(
             {
-              showDetails: false
+              showDetails: undefined
             },
             '',
             pathname
@@ -266,37 +264,40 @@ const SongPlayerAction = ({
         }}>
         <>
           <div
-            className={` lg:flex lg:gap-x-5 absolute inset-5 p-5 bg-white border-2 border-gray-500 shadow-xl ${
+            className={` lg:flex lg:gap-x-5 absolute inset-5 p-3 bg-white border-2 border-gray-500 shadow-xl ${
               modalOpen ? 'bg-opacity-100' : 'bg-opacity-0'
             } overflow-y-auto transition-all ease-in-out`}>
             <div className=" flex flex-col lg:w-[50%]">
               {peaks && (
                 <div className=" relative w-full" ref={waveformContainerRef}>
                   <Waveform
-                    totalTime={duration}
+                    totalTime={duration as number}
                     currentTime={currentTime}
                     highlight={highlight}
                     peaks={peaks}
                     isSelectingRange={rangeSelection}
                     onTimeChange={changeTime}
-                    onScroll={(left) => {
-                      if (waveformContainerRef.current) {
-                        waveformContainerRef.current.scrollBy({
-                          left,
-                          behavior: 'smooth'
-                        })
-                      }
-                    }}
+                    // onScroll={(left) => {
+                    //   if (waveformContainerRef.current) {
+                    //     waveformContainerRef.current.scrollBy({
+                    //       left,
+                    //       behavior: 'smooth'
+                    //     })
+                    //   }
+                    // }}
                     onRangeUpdate={(newRange) => {
-                      console.log('on range update!', { newRange })
                       setCommentRange(newRange)
                     }}
                   />
                 </div>
               )}
 
-              <SongPlayer {...props} size="small" />
-              <div className=" flex flex-col mt-5">
+              <SongPlayer
+                {...props}
+                audioIndex={Number(showDetails)}
+                size="small"
+              />
+              <div className=" flex flex-col gap-y-3 mt-5">
                 <div
                   className=" relative flex justify-center bg-pink-600 font-bold text-white py-1 select-none"
                   onClick={() => setAddingComment((prev) => !prev)}>
@@ -364,7 +365,10 @@ const SongPlayerAction = ({
             </div>
 
             <div className=" flex flex-col gap-y-2 lg:w-[50%]">
-              <span className=" font-bold text-lg">Dyskusja</span>
+              <div>
+                <span className=" text-md">Dyskusja</span>
+                <div className=" flex w-full bg-black h-[2px]" />
+              </div>
 
               <div className=" flex justify-center">
                 <div
@@ -376,7 +380,7 @@ const SongPlayerAction = ({
                     setScrolLPosition(eTarget.scrollTop)
                   }}>
                   {commentContainerRef.current &&
-                    comments.length > 1 &&
+                    comments?.length > 1 &&
                     commentContainerRef.current?.scrollTop > 0 && (
                       <div className=" sticky flex justify-center items-center top-0 w-full bg-neutral-100 text-neutral-500 shadow-xl">
                         <ArrowDropUpIcon style={{ fontSize: '1rem' }} />
@@ -384,13 +388,9 @@ const SongPlayerAction = ({
                     )}
 
                   {comments
-                    .toSorted((a, b) => {
-                      if (a.attributes?.createdAt > b.attributes?.createdAt)
-                        return -1
-                      else if (
-                        a.attributes?.createdAt < b.attributes?.createdAt
-                      )
-                        return 1
+                    ?.toSorted((a, b) => {
+                      if (a.createdAt > b.createdAt) return -1
+                      else if (a.createdAt < b.createdAt) return 1
                       else return 0
                     })
                     .map((comment, index) => {
@@ -398,7 +398,7 @@ const SongPlayerAction = ({
                         <CommentBox
                           key={comment.id}
                           data={comment}
-                          userId={session.data?.user?.id}
+                          userId={session.data?.token.user.id}
                           selected={comment.id === selectedComment}
                           onSelect={(id, timeRange) => {
                             console.log({ timeRange })
@@ -426,7 +426,7 @@ const SongPlayerAction = ({
                     })}
 
                   {commentContainerRef.current &&
-                    comments.length > 1 &&
+                    comments?.length > 1 &&
                     commentContainerRef.current?.scrollTop !==
                       commentContainerRef.current.scrollHeight -
                         commentContainerRef.current.clientHeight && (

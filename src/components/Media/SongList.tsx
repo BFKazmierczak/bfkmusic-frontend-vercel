@@ -1,58 +1,70 @@
 'use client'
 
-import { SongEntity } from '@/src/gql/graphql'
+import { SongType } from '@/src/gql/graphql'
 import SongPlayer from './SongPlayer/SongPlayer'
 
 import AddIcon from '@mui/icons-material/Add'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
-import { useMutation } from '@apollo/client'
-import { useState } from 'react'
+import { gql, useMutation } from '@apollo/client'
+import { useEffect, useState } from 'react'
 import { graphql } from '@/src/gql'
 import { useSession } from 'next-auth/react'
+import { Tooltip } from '@mui/material'
 
-const ADD_TO_LIBRARY = graphql(`
-  mutation AddToLibrary($songId: Int!) {
-    addSongToLibrary(songId: $songId) {
-      data {
+import { toast } from 'react-toastify'
+
+import FavoriteIcon from '@mui/icons-material/Favorite'
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import { useRouter } from 'next/navigation'
+
+const MANAGE_FAVORITE = graphql(`
+  mutation ManageFavorite($songId: ID!) {
+    songManageFavorite(songId: $songId) {
+      success
+      song {
         id
-        attributes {
-          name
-          description
-          inLibrary
+        createdAt
+        updatedAt
+        publishedAt
+        inLibrary
+        isFavorite
+        name
+        description
+        audioFiles {
+          id
           createdAt
           updatedAt
-          publishedAt
-          audio {
-            data {
-              id
-              attributes {
-                name
-                alternativeText
-                caption
-                url
-                duration
-              }
-            }
+          uploadedBy {
+            id
+            username
+            email
           }
+          name
+          description
+          duration
+          waveform
+          file
         }
       }
     }
   }
 `)
 
-interface SongEntityObject {
-  [key: string]: SongEntity
+interface SongTypeObject {
+  [key: string]: SongType
 }
 
 interface SongListProps {
-  initialSongs: SongEntity[] | []
+  initialSongs: SongType[] | []
 }
 
 const SongList = ({ initialSongs }: SongListProps) => {
   const session = useSession()
+  const router = useRouter()
 
-  const [songs, setSongs] = useState<SongEntityObject>(() => {
-    const temp: SongEntityObject = {}
+  const [songs, setSongs] = useState<SongTypeObject>(() => {
+    const temp: SongTypeObject = {}
 
     initialSongs.forEach((song) => {
       temp[song.id as string] = song
@@ -61,55 +73,79 @@ const SongList = ({ initialSongs }: SongListProps) => {
     return temp
   })
 
-  const [addToLibrary] = useMutation(ADD_TO_LIBRARY, {
+  const [manageFavorite] = useMutation(MANAGE_FAVORITE, {
     onCompleted: (data) => {
-      const newSong = data.addSongToLibrary?.data
+      const newSong = data?.songManageFavorite?.song
+
+      console.log({ newSong })
       const newId = newSong?.id
 
       if (newSong && newId) {
-        setSongs((prev) => ({ ...prev, [newId]: newSong } as SongEntityObject))
+        setSongs((prev) => ({ ...prev, [newId]: newSong } as SongTypeObject))
+
+        let message = 'Dodano do ulubionych'
+        if (!newSong.isFavorite) message = 'Usunięto z ulubionych'
+
+        toast(message, { type: 'success', theme: 'colored' })
       }
     }
   })
 
-  function testFunc(event: React.MouseEvent<HTMLButtonElement>, id: number) {
-    addToLibrary({
+  useEffect(() => {
+    console.log({ songs })
+  }, [songs])
+
+  function testFunc(event: React.MouseEvent<HTMLButtonElement>, id: string) {
+    manageFavorite({
       variables: {
         songId: id
       }
     })
   }
 
-  function handleAdd(songId: number) {
+  function handleAdd(songId: string) {
     return (event: React.MouseEvent<HTMLButtonElement>) =>
       testFunc(event, songId)
   }
 
   return (
-    <div className=" flex flex-col gap-y-5 my-10">
-      {Object.values(songs)?.map((song: SongEntity) => {
-        const audioData = song.attributes?.audio?.data
+    <div className=" flex flex-col w-full px-10 gap-y-5 my-10">
+      {Object.values(songs)?.map((song: SongType) => {
+        const audioData = song.audioFiles
 
         if (audioData && audioData.length > 0) {
           return (
             <SongPlayer key={song.id} song={song} showMainName>
-              {song.attributes?.inLibrary ? (
-                <span className=" flex items-center w-fit h-7 gap-x-1 text-sm select-none font-bold text-pink-600">
-                  <CheckBoxIcon style={{ fontSize: '1.25rem' }} />
-                  <span className=" text-[13px]">W bibliotece</span>
+              <div className=" flex justify-between items-end text-sm">
+                <span
+                  className=" flex items-center gap-x-1 font-bold text-[14px] text-pink-700 underline select-none cursor-pointer"
+                  onClick={() => router.push(`/song/${song.id}`)}>
+                  Otwórz
+                  <OpenInNewIcon style={{ fontSize: '0.9rem' }} />
                 </span>
-              ) : (
-                session.data && (
-                  <button
-                    className=" small-button h-7"
-                    onClick={handleAdd(Number(song.id))}>
-                    <span className=" flex justify-center items-center gap-x-1">
-                      <AddIcon style={{ fontSize: '1rem' }} />
-                      <span className=" hidden sm:inline">Do biblioteki</span>
+
+                {session.status === 'authenticated' && (
+                  <Tooltip
+                    title={
+                      song.isFavorite
+                        ? 'W ulubionych (kliknij, aby usunąć)'
+                        : 'Dodaj do ulubionych'
+                    }
+                    placement="left">
+                    <span onClick={handleAdd(song.id)}>
+                      {song.isFavorite && (
+                        <FavoriteIcon
+                          style={{ fontSize: '1.25rem', color: '#be185d' }}
+                        />
+                      )}
+
+                      {!song.isFavorite && (
+                        <FavoriteBorderIcon style={{ fontSize: '1.25rem' }} />
+                      )}
                     </span>
-                  </button>
-                )
-              )}
+                  </Tooltip>
+                )}
+              </div>
             </SongPlayer>
           )
         }

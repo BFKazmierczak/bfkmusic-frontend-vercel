@@ -7,9 +7,9 @@ import {
   NextSSRInMemoryCache
 } from '@apollo/experimental-nextjs-app-support/ssr'
 import { useSession } from 'next-auth/react'
-import errorLink from './errorLink'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { setContext } from '@apollo/client/link/context'
+import errorLink from './errorLink'
 
 function makeClient() {
   const authLink = setContext(async (_, { headers, token }) => {
@@ -43,6 +43,8 @@ function makeClient() {
 export function ApolloWrapper({ children }: React.PropsWithChildren) {
   const session = useSession()
 
+  console.log({ session })
+
   return (
     <>
       {session.status === 'loading' && <></>}
@@ -58,13 +60,13 @@ export function ApolloWrapper({ children }: React.PropsWithChildren) {
 
 function UpdateAuth({ children }: { children: ReactNode }) {
   const session = useSession()
-
   const apolloClient = useApolloClient()
 
   useEffect(() => {
-    if (session.data?.user.jwt)
-      apolloClient.defaultContext.token = session.data.user.jwt
-  }, [session.data?.user.jwt])
+    if (session.data?.token.jwt) {
+      apolloClient.defaultContext.token = session.data.token.jwt
+    }
+  }, [session.data?.token.jwt])
 
   return <>{children}</>
 }

@@ -8,8 +8,7 @@
     "start": "next start",
     "export": "next export",
     "lint": "next lint",
-    "codegen": "graphql-codegen --config codegen.ts",
-    "predev": "yarn codegen"
+    "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
     "@apollo/client": "^3.9.8",

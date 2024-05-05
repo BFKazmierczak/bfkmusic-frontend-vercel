@@ -33,14 +33,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body className={` ${barlow.className}`}>
+        <ToastProvider />
         <NextAuthProvider>
           <ApolloWrapper>
-            <ToastProvider>
-              <MainHeader />
-              <div className=" flex justify-center">{children}</div>
-              <GlobalPlayer />
-              <GlobalAudio />
-            </ToastProvider>
+            <MainHeader />
+            <div className=" flex w-full justify-start p-5">{children}</div>
+            <GlobalPlayer />
+            <GlobalAudio />
           </ApolloWrapper>
         </NextAuthProvider>
       </body>

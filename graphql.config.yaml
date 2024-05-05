@@ -1,2 +1,2 @@
 schema:
-  - ./graphql.schema.json
+  - https://bfkmusic-api-production.up.railway.app/graphql

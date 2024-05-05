@@ -53,25 +53,27 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login'
   },
   session: {
-    strategy: 'jwt', // JSON Web Token
-    maxAge: 2 * 60 * 60 - 120
+    strategy: 'jwt',
+    maxAge: 1 * 60 * 60 - 120 // expire prior to server expiration
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         const decodedPayload = parseJwt(user.jwt)
-        token = { ...user, ...decodedPayload }
+        return { ...user, ...decodedPayload }
       }
 
       return token
     },
     async session({ session, user, token }) {
-      if (token) {
-        session.user = token.user
-      }
+      console.log('accessing the session', { session })
 
-      return session
+      const modifiedSession = { ...session }
+      modifiedSession.token = token
+      modifiedSession.user = { ...token.user }
+
+      return modifiedSession
     }
   },
   providers: [

@@ -277,7 +277,7 @@ const Waveform = ({
     <div
       className={` relative z-[60] ${
         movingLeft || movingRight ? ' overflow-x-hidden' : ' overflow-x-auto'
-      } py-2 bg-green-400 transition-all ease-in-out`}
+      } py-2 bg-neutral-600 transition-all ease-in-out`}
       ref={containerRef}
       onClick={(event) => {
         if (!isSelectingRange) handleWaveformClick(event)
@@ -355,7 +355,7 @@ const Waveform = ({
         />
       )}
 
-      <div className=" relative">
+      <div className=" relative flex items-center">
         <canvas
           ref={progCanvasRef}
           className=" absolute z-50"

@@ -34,7 +34,8 @@
     "src/stores/**/*.ts",
     "src/utils/**/*.ts",
     ".next/types/**/*.ts",
-    "lib"
+    "lib",
+    "types"
   ],
   "exclude": ["node_modules", "src/gql/**/*.ts"]
 }

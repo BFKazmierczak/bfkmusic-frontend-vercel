@@ -14,9 +14,9 @@ const HamburgerMenu = () => {
   const [expanded, setExpanded] = useState<boolean>(false)
 
   return (
-    <div className=" relative sm:hidden flex flex-col bg-fuchsia-500">
+    <div className=" relative sm:hidden flex flex-col">
       <div
-        className={` fixed inset-0 z-10 ${
+        className={` fixed inset-0 z-[100] ${
           !expanded && '-translate-x-48'
         } bg-neutral-800 w-48 h-full transition-all ease-in-out`}>
         <div className=" px-5 py-7 bg-neutral-700 h-[5.5rem] w-full" />
@@ -47,7 +47,7 @@ const HamburgerMenu = () => {
       />
 
       <div
-        className={` absolute -translate-y-6 flex flex-row items-center gap-x-5 z-10 text-white ${
+        className={`  absolute -translate-y-6 flex flex-row items-center gap-x-5 z-[100] text-white ${
           expanded ? '' : ' -translate-x-[6.5rem]'
         } transition-all ease-in-out`}>
         <div className={` px-1 font-bold select-none w-20 bg-pink-700`}>

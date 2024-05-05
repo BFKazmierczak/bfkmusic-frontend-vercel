@@ -5,78 +5,48 @@ import SongViewDetailed from '@/src/components/Media/SongViewDetailed/SongViewDe
 import { gql } from '@apollo/client'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { SongEntity } from '@/src/gql/graphql'
+import { SongType } from '@/src/gql/graphql'
 
 const GET_SONG = graphql(`
-  query GetSong($id: ID) {
-    song(id: $id) {
-      data {
+  query GetSong($songId: ID!) {
+    song(songId: $songId) {
+      id
+      createdAt
+      updatedAt
+      publishedAt
+      inLibrary
+      isFavorite
+      name
+      description
+      audioFiles {
         id
-        attributes {
-          name
-          description
-          audio {
-            data {
-              id
-              attributes {
-                name
-                alternativeText
-                caption
-                width
-                height
-                formats
-                hash
-                ext
-                mime
-                size
-                duration
-                url
-                previewUrl
-                provider
-                provider_metadata
-                createdAt
-                updatedAt
-                waveform {
-                  data {
-                    id
-                    attributes {
-                      peaks
-                    }
-                  }
-                }
-              }
-            }
-          }
-          comments {
-            data {
-              id
-              attributes {
-                fileId
-                content
-                timeRange
-                createdAt
-                updatedAt
-                publishedAt
-                user {
-                  data {
-                    id
-                    attributes {
-                      username
-                    }
-                  }
-                }
-              }
-            }
-          }
+        createdAt
+        updatedAt
+        uploadedBy {
+          id
+          username
+        }
+        name
+        description
+        duration
+        waveform
+        file
+        comments {
+          id
           createdAt
           updatedAt
-          publishedAt
+          content
+          user {
+            id
+            username
+          }
+          startTime
+          endTime
         }
       }
     }
   }
 `)
-
 interface SongPageProps {
   params: {
     songId: string
@@ -84,38 +54,41 @@ interface SongPageProps {
 }
 
 const SongPage = async ({ params }: SongPageProps) => {
-  const session = await getServerSession(authOptions)
+  // const session = await getServerSession(authOptions)
 
-  if (session) {
-    const songQuery = await getClient().query({
-      query: GET_SONG,
-      variables: {
-        id: params.songId
-      }
-    })
+  console.log({ params })
 
-    const songData = songQuery?.data?.song?.data
+  const songQuery = await getClient().query({
+    query: GET_SONG,
+    variables: {
+      songId: decodeURIComponent(params.songId)
+    }
+  })
 
-    if (!songData)
-      return (
-        <div className=" flex justify-center items-center text-red-500">
-          Nie udało się pozyskać utworu
-        </div>
-      )
+  const songData = songQuery.data.song
 
+  console.log({ songData })
+
+  if (!songData) {
     return (
-      <>
-        <div className=" flex flex-col items-center justify-center gap-y-5">
-          <span className=" font-bold text-lg">
-            {songData.attributes?.name}
-          </span>
-
-          <SongViewDetailed song={songData as SongEntity} />
-        </div>
-      </>
+      <div className=" flex justify-center items-center text-red-500">
+        Nie udało się pozyskać utworu
+      </div>
     )
-  } else {
   }
+
+  return (
+    <>
+      <div className=" flex w-full flex-col gap-y-2">
+        <div>
+          <span className="  flex font-bold text-lg">{songData?.name}</span>
+          <div className=" flex w-full bg-black h-[2px]" />
+        </div>
+
+        <SongViewDetailed song={songData as SongType} />
+      </div>
+    </>
+  )
 }
 
 export default SongPage

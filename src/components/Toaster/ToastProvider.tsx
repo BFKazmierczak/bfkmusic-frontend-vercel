@@ -9,10 +9,9 @@ interface ToastProviderProps {
   children: ReactNode
 }
 
-const ToastProvider = ({ children }: ToastProviderProps) => {
+const ToastProvider = () => {
   return (
     <>
-      {children}
       <ToastContainer />
     </>
   )

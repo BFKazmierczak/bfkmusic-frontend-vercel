@@ -1,34 +1,40 @@
 import { getClient } from '@/lib/client'
 import SongList from '@/src/components/Media/SongList'
 import { graphql } from '@/src/gql'
-import { SongEntity } from '@/src/gql/graphql'
+import { SongType } from '@/src/gql/graphql'
+import { gql } from '@apollo/client'
 
 // export const dynamic = 'force-dynamic'
 
 const GET_SONGS = graphql(`
-  query GetSongs($pagination: PaginationArg) {
-    songs(pagination: $pagination) {
-      data {
-        id
-        attributes {
-          name
-          description
-          audio {
-            data {
-              id
-              attributes {
-                name
-                alternativeText
-                caption
-                url
-                duration
-              }
-            }
-          }
-          inLibrary
+  query GetSongs($first: Int) {
+    allSongs(first: $first) {
+      edges {
+        cursor
+        node {
+          id
           createdAt
           updatedAt
           publishedAt
+          name
+          description
+          inLibrary
+          isFavorite
+          audioFiles {
+            id
+            createdAt
+            updatedAt
+            uploadedBy {
+              id
+              username
+              email
+            }
+            name
+            description
+            duration
+            waveform
+            file
+          }
         }
       }
     }
@@ -39,20 +45,18 @@ const CatalogPage = async () => {
   const result = await getClient().query({
     query: GET_SONGS,
     variables: {
-      pagination: {
-        page: 1,
-        pageSize: 10
-      }
+      first: 10
     }
   })
 
-  const songs = result.data.songs?.data as SongEntity[]
-
-  console.log({ songs })
+  const songs = result?.data.allSongs?.edges.map(
+    (edge) => edge?.node
+  ) as SongType[]
 
   return (
     <>
-      <SongList initialSongs={songs} />
+      {songs && <SongList initialSongs={songs} />}{' '}
+      {!songs && <p>Nie udało się pobrać utworów</p>}{' '}
     </>
   )
 }

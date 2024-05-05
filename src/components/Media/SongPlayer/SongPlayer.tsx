@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { SongEntity } from '@/src/gql/graphql'
+import { SongType } from '@/src/gql/graphql'
 
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import PauseIcon from '@mui/icons-material/Pause'
@@ -9,13 +9,9 @@ import AudioSlider from '../AudioSlider/AudioSlider'
 import useHighlightStore from '../../../stores/highlightStore'
 import useGlobalPlayerStore from '@/src/stores/globalPlayerStore'
 import formatTime from '@/src/utils/formatTime'
-import LibraryAddCheckIcon from '@mui/icons-material/LibraryAddCheck'
-import { Tooltip } from '@mui/material'
-import { gql, useMutation } from '@apollo/client'
-import { graphql } from '@/src/gql'
 
 export interface SongPlayerProps {
-  song: SongEntity
+  song: SongType
   audioIndex?: number
   size?: 'small' | 'normal'
   showMainName?: boolean
@@ -48,13 +44,13 @@ const SongPlayer = ({
   const [innerFormattedTime, setInnerFormattedTime] = useState<string>('0:00')
 
   const audioDuration = useMemo((): number => {
-    const data = song.attributes?.audio?.data[audioIndex]
+    const data = song?.audioFiles[audioIndex]
 
-    if (data) return data.attributes?.duration as number
+    if (data) return data.duration as number
     else return 0
   }, [song])
 
-  const file = song.attributes?.audio?.data[audioIndex]
+  const file = song?.audioFiles[audioIndex]
 
   useEffect(() => {
     if (thisPlaying) {
@@ -71,74 +67,60 @@ const SongPlayer = ({
   }, [currentTime])
 
   useEffect(() => {
-    console.log('Source:', source)
-
-    const innerSsource =
-      song.attributes?.audio?.data[audioIndex].attributes?.url
-
-    console.log('innerSource:', innerSsource)
+    const innerSsource = song?.audioFiles[audioIndex]?.file
 
     if (thisPlaying) setLocalPlaying(true)
     else setLocalPlaying(false)
   }, [source])
 
   const thisPlaying = useMemo(() => {
-    return song.attributes?.audio?.data[audioIndex].attributes?.url === source
+    return song?.audioFiles[audioIndex]?.file === source
   }, [source])
 
   return (
-    <div className=" flex flex-row bg-neutral-300 w-64 sm:w-96 z-[7 0] ">
-      <div
-        className={` h-full aspect-square ${
-          size === 'normal' && 'aspect-square'
-        } bg-neutral-700`}>
-        <div className=" flex justify-center items-center w-full h-full text-white bg-pink-600">
-          {localPlaying ? (
-            <div
-              onClick={() => {
-                pause()
-              }}>
-              <PauseIcon style={{ fontSize: '3rem' }} />
-            </div>
-          ) : (
-            <div
-              onClick={() => {
-                const time = innerTime > 0 ? innerTime : undefined
+    <div className=" flex flex-row bg-neutral-300 sm:w-96 z-[7 0] ">
+      <div className=" flex justify-center items-center aspect-square text-white bg-pink-600">
+        {localPlaying ? (
+          <div
+            onClick={() => {
+              pause()
+            }}>
+            <PauseIcon />
+          </div>
+        ) : (
+          <div
+            onClick={() => {
+              const time = innerTime > 0 ? innerTime : undefined
 
-                playSong(song, time, audioIndex)
-              }}>
-              <PlayArrowIcon style={{ fontSize: '3rem' }} />
-            </div>
-          )}
-        </div>
+              playSong(song, time, audioIndex)
+            }}>
+            <PlayArrowIcon />
+          </div>
+        )}
       </div>
 
       <div
         className={` flex w-full flex-col gap-y-2 p-3 overflow-x-hidden ${
           size === 'small' && 'items-start'
         } `}>
-        <div className=" flex gap-x-2 items-center">
+        <div className=" flex justify-between w-full gap-x-2 items-center">
           <span
-            className=" flex w-fit"
+            className=" flex w-fit font-bold text-sm"
             style={{
               whiteSpace: 'nowrap',
               display: 'flex',
               overflow: 'auto'
             }}>
-            {showMainName
-              ? song.attributes?.name
-              : song.attributes?.audio?.data[audioIndex].attributes?.name}
+            {showMainName && song?.name}
+            {!showMainName &&
+              (song?.audioFiles[audioIndex]?.name.length > 1
+                ? song?.audioFiles[audioIndex]?.name
+                : 'Plik bez nazwy')}
           </span>
-
-          {song.attributes?.isOwned && (
-            <Tooltip title="Posiadasz ten utwór" placement="left">
-              <LibraryAddCheckIcon style={{ fontSize: '1rem' }} />
-            </Tooltip>
-          )}
         </div>
 
         {size !== 'small' && (
-          <>
+          <div>
             <AudioSlider
               totalTime={audioDuration}
               currentTime={innerTime}
@@ -146,16 +128,15 @@ const SongPlayer = ({
               //   highlight[1] === Number(file?.id) ? highlight[0] : undefined
               // }
               onTimeChange={(newTime) => {
-                console.log('time change!')
                 changeTime(newTime)
               }}
             />
 
-            <div>
+            <div className=" flex w-full">
               <span>{innerFormattedTime} /</span>
               <span>{formatTime(audioDuration)}</span>
             </div>
-          </>
+          </div>
         )}
 
         {children}

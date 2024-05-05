@@ -1,20 +1,16 @@
 import { create } from 'zustand'
-import { SongEntity } from '../gql/graphql'
+import { SongType } from '../gql/graphql'
 import { RefObject } from 'react'
 import formatTime from '../utils/formatTime'
 
 type GlobalPlayerStore = {
-  songData: SongEntity | undefined
+  songData: SongType | undefined
   current: HTMLAudioElement | undefined
   setCurrent: (current: HTMLAudioElement) => void
   playing: boolean
   play: () => void
   pause: () => void
-  playSong: (
-    newSongData: SongEntity,
-    time?: number,
-    audioIndex?: number
-  ) => void
+  playSong: (newSongData: SongType, time?: number, audioIndex?: number) => void
   changeTime: (newTime: number) => void
   endSong: () => void
   currentTime: number
@@ -44,11 +40,10 @@ const useGlobalPlayerStore = create<GlobalPlayerStore>()((set) => ({
       if (state.songData?.id === newSongData.id) {
         return { currentTime: time, playing: true }
       } else {
-        const newSrc =
-          newSongData.attributes?.audio?.data[audioIndex].attributes?.url
+        const newSrc = newSongData.audioFiles[audioIndex]?.file
+        const duration = newSongData.audioFiles[audioIndex]?.duration
 
-        const duration =
-          newSongData.attributes?.audio?.data[audioIndex].attributes?.duration
+        console.log({ newSrc })
 
         if (state.current && newSrc) {
           state.current.src = newSrc

@@ -34,7 +34,7 @@ const GlobalAudio = memo(() => {
     <>
       <audio
         ref={audioRef}
-        src={`${process.env.BACKEND_URL}${source}`}
+        src={`${process.env.MEDIA_URL}${source}`}
         onTimeUpdate={handleTimeUpdate}
         onEnded={() => endSong()}
       />

@@ -7,25 +7,25 @@ import { useEffect, useState } from 'react'
 import { gql, useQuery } from '@apollo/client'
 import { graphql } from '@/src/gql'
 
-const GET_SONGS = graphql(`
-  query GetLibrarySongs($filters: SongFiltersHiddenInput) {
-    songs(filters: $filters) {
-      data {
-        id
-        attributes {
-          createdAt
-          updatedAt
-          publishedAt
-          name
-          description
-          inLibrary
-          isOwned
-          non_owner_visible
-        }
-      }
-    }
-  }
-`)
+// const GET_SONGS = graphql(`
+//   query GetLibrarySongs($filters: SongFiltersHiddenInput) {
+//     songs(filters: $filters) {
+//       data {
+//         id
+//         attributes {
+//           createdAt
+//           updatedAt
+//           publishedAt
+//           name
+//           description
+//           inLibrary
+//           isOwned
+//           non_owner_visible
+//         }
+//       }
+//     }
+//   }
+// `)
 
 interface SongLibraryViewProps {
   initialSongs?: SongEntity[]
@@ -38,20 +38,20 @@ const SongLibraryView = ({ initialSongs }: SongLibraryViewProps) => {
 
   const [selected, setSelected] = useState<'all' | 'bought'>('all')
 
-  const { data, loading } = useQuery(GET_SONGS, {
-    variables: {
-      filters
-    }
-  })
+  // const { data, loading } = useQuery(GET_SONGS, {
+  //   variables: {
+  //     filters
+  //   }
+  // })
 
-  useEffect(() => {
-    if (data?.songs) setSongs(data.songs.data)
-  }, [data?.songs])
+  // useEffect(() => {
+  //   if (data?.songs) setSongs(data.songs.data)
+  // }, [data?.songs])
 
-  useEffect(() => {
-    if (selected === 'all') setFilters({ inLibrary: true, isOwned: false })
-    else setFilters({ inLibrary: false, isOwned: true })
-  }, [selected])
+  // useEffect(() => {
+  //   if (selected === 'all') setFilters({ inLibrary: true, isOwned: false })
+  //   else setFilters({ inLibrary: false, isOwned: true })
+  // }, [selected])
 
   return (
     <>
